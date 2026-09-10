@@ -9,10 +9,12 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/settings") ||
     pathname.startsWith("/api/");
 
-  // Do not let a missing Vercel env var crash the entire site at the Edge.
-  // /login must remain reachable so authentication can be initialized there.
+  // Support both the legacy anon key and the modern publishable key so the
+  // Edge middleware keeps working across Supabase key migrations.
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     if (protectedPath) {
