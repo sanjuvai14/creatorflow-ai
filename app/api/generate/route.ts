@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+async function refundCredit(userId: string) {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("refund_credit", { p_user_id: userId });
+    return { credits: error ? null : data, ok: !error };
+  } catch {
+    return { credits: null, ok: false };
+  }
+}
 
 export async function POST(req: Request) {
   try {
     const { tool, language, topic, tone } = await req.json();
     if (!topic?.trim()) return NextResponse.json({ error: "Topic is required." }, { status: 400 });
+    if (topic.trim().length > 5000) return NextResponse.json({ error: "Topic is too long. Please keep it under 5,000 characters." }, { status: 400 });
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -30,8 +42,11 @@ export async function POST(req: Request) {
         output = response.output_text;
       }
     } catch {
-      const { data: refundedCredits } = await supabase.rpc("refund_credit", { p_user_id: user.id });
-      return NextResponse.json({ error: "AI generation failed. Your credit has been returned; please try again.", credits: refundedCredits ?? credits }, { status: 502 });
+      const refund = await refundCredit(user.id);
+      return NextResponse.json({
+        error: refund.ok ? "AI generation failed. Your credit has been returned; please try again." : "AI generation failed. We could not automatically return the credit. Please contact support.",
+        credits: refund.credits ?? credits,
+      }, { status: 502 });
     }
 
     const { error: genError } = await supabase.from("generations").insert({
