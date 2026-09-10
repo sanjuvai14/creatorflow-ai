@@ -40,7 +40,8 @@ export async function POST(req: Request) {
       const image = result.data?.[0];
       return NextResponse.json({ imageUrl: image?.url || null, revisedPrompt: image?.revised_prompt || finalPrompt, credits });
     } catch {
-      return NextResponse.json({ error: "AI image generation failed. Your credit was reserved; please try again." }, { status: 502 });
+      const { data: refundedCredits } = await supabase.rpc("refund_credit", { p_user_id: user.id });
+      return NextResponse.json({ error: "AI image generation failed. Your credit has been returned; please try again.", credits: refundedCredits ?? credits }, { status: 502 });
     }
   } catch {
     return NextResponse.json({ error: "Image generation failed. Check your API configuration." }, { status: 500 });
