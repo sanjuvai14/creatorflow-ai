@@ -96,4 +96,5 @@ export default function Dashboard() {
       @media(max-width:850px){.cf-workspace{grid-template-columns:1fr}.cf-sidebar{position:static}.cf-tool{display:flex;min-height:58px}.cf-tool i{margin-left:auto}.cf-welcome{align-items:flex-start;flex-direction:column}.cf-stat{width:100%}}
       @media(max-width:560px){.cf-dashboard{padding:12px 12px 30px!important}.cf-topbar{padding-bottom:16px}.cf-top-actions{width:100%}.cf-credit{flex:1}.cf-icon-btn{min-height:42px}.cf-welcome{padding:22px;border-radius:19px}.cf-generator,.cf-result{padding:18px}.cf-form-grid{grid-template-columns:1fr}.cf-generate-row{align-items:stretch;flex-direction:column}.cf-generate{width:100%}.cf-section-head{flex-direction:column}.cf-result-head{flex-direction:column}.cf-result-actions{width:100%}.cf-result-actions .cf-icon-btn{flex:1}}
     `}</style>
-  </main>
+  </main>;
+}
