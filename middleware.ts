@@ -2,28 +2,55 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const protectedPath =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/history") ||
+    pathname.startsWith("/api/");
+
+  // Do not let a missing Vercel env var crash the entire site at the Edge.
+  // /login must remain reachable so authentication can be initialized there.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    if (protectedPath) {
+      if (pathname.startsWith("/api/")) {
+        return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+
+    return NextResponse.next();
+  }
+
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        },
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
       },
-    }
-  );
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const pathname = request.nextUrl.pathname;
-  const protectedPath = pathname.startsWith("/dashboard") || pathname.startsWith("/history") || pathname.startsWith("/api/");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (protectedPath && !user) {
     if (pathname.startsWith("/api/")) {
@@ -32,6 +59,7 @@ export async function middleware(request: NextRequest) {
         headers: { "Content-Type": "application/json" },
       });
     }
+
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
