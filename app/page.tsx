@@ -10,39 +10,41 @@ const tools = [
 
 export default function Home() {
   return (
-    <main>
-      <nav style={{maxWidth: 1180, margin: "0 auto", padding: "24px 20px", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-        <div style={{fontWeight:900, fontSize:22}}>Creator<span style={{color:"#8b7cff"}}>Flow</span> <span style={{fontSize:13}}>AI</span></div>
-        <div style={{display:"flex", gap:10}}>
-          <Link href="/login" className="cf-btn">Get Started</Link>
-        </div>
+    <main style={{minHeight:"100vh"}}>
+      <nav style={{maxWidth:1180, margin:"0 auto", padding:"20px", display:"flex", justifyContent:"space-between", alignItems:"center", gap:16}}>
+        <div style={{fontWeight:900, fontSize:22, letterSpacing:-.5}}>Creator<span style={{color:"#8b7cff"}}>Flow</span> <span style={{fontSize:12, opacity:.75}}>AI</span></div>
+        <Link href="/login" className="cf-btn">Get Started</Link>
       </nav>
 
-      <section style={{maxWidth: 1000, margin:"70px auto 0", padding:"20px", textAlign:"center"}}>
-        <div className="cf-muted" style={{fontWeight:700, letterSpacing:1}}>AI CONTENT CREATION PLATFORM</div>
-        <h1 style={{fontSize:"clamp(44px,8vw,82px)", lineHeight:1.02, margin:"18px 0"}}>
-          Create. Publish.<br/><span style={{color:"#8b7cff"}}>Grow.</span>
+      <section style={{maxWidth:1050, margin:"48px auto 0", padding:"30px 20px 20px", textAlign:"center"}}>
+        <div className="cf-muted" style={{fontWeight:800, letterSpacing:2, fontSize:12}}>AI CONTENT CREATION WORKSPACE</div>
+        <h1 style={{fontSize:"clamp(44px,9vw,86px)", lineHeight:.98, letterSpacing:-3, margin:"18px 0 22px"}}>
+          Create faster.<br/><span style={{background:"linear-gradient(90deg,#9b87ff,#22d3ee)", WebkitBackgroundClip:"text", color:"transparent"}}>Grow smarter.</span>
         </h1>
-        <p className="cf-muted" style={{fontSize:19, maxWidth:680, margin:"0 auto 28px"}}>
-          One workspace for YouTube, TikTok, Instagram, Facebook, freelancers and small businesses.
+        <p className="cf-muted" style={{fontSize:"clamp(16px,2.2vw,20px)", lineHeight:1.6, maxWidth:700, margin:"0 auto 30px"}}>
+          One simple AI workspace for YouTube, Shorts, social posts, product copy and creator visuals—on phone or PC.
         </p>
-        <Link href="/login" className="cf-btn" style={{display:"inline-block"}}>Start Creating Free →</Link>
+        <div style={{display:"flex", justifyContent:"center", gap:12, flexWrap:"wrap"}}>
+          <Link href="/login" className="cf-btn">Start Creating Free →</Link>
+          <a href="#tools" style={{display:"inline-flex", alignItems:"center", minHeight:44, padding:"12px 18px", border:"1px solid var(--border)", borderRadius:13, fontWeight:700, background:"rgba(255,255,255,.04)"}}>Explore Tools</a>
+        </div>
       </section>
 
-      <section style={{maxWidth:1180, margin:"80px auto", padding:"20px", display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(210px,1fr))", gap:16}}>
+      <section id="tools" style={{maxWidth:1180, margin:"62px auto", padding:"20px", display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(205px,1fr))", gap:16}}>
         {tools.map(([icon,title,desc]) => (
-          <div className="cf-card" key={title} style={{padding:24}}>
-            <div style={{fontSize:30}}>{icon}</div>
-            <h3>{title}</h3>
-            <p className="cf-muted">{desc}</p>
+          <div className="cf-card cf-glow" key={title} style={{padding:24, minHeight:170, transition:"transform .2s ease"}}>
+            <div style={{fontSize:30, marginBottom:12}}>{icon}</div>
+            <h3 style={{margin:"0 0 8px", fontSize:18}}>{title}</h3>
+            <p className="cf-muted" style={{margin:0, lineHeight:1.55, fontSize:14}}>{desc}</p>
           </div>
         ))}
       </section>
 
-      <section style={{maxWidth:900, margin:"0 auto 100px", padding:"20px"}}>
-        <div className="cf-card" style={{padding:30}}>
-          <h2>Built multilingual from day one</h2>
-          <p className="cf-muted">English · বাংলা · Hindi · Spanish · Portuguese · French · German · Arabic · Indonesian · Turkish</p>
+      <section style={{maxWidth:900, margin:"0 auto 80px", padding:"20px"}}>
+        <div className="cf-card cf-glow" style={{padding:"28px", textAlign:"center"}}>
+          <div style={{fontSize:12, fontWeight:800, letterSpacing:1.5, marginBottom:8}}>MADE FOR CREATORS</div>
+          <h2 style={{margin:"0 0 10px", fontSize:"clamp(24px,5vw,36px)"}}>Your ideas. One workspace.</h2>
+          <p className="cf-muted" style={{margin:"0 auto", lineHeight:1.6}}>English · বাংলা · Hindi · Spanish · Portuguese · French · German · Arabic · Indonesian · Turkish</p>
         </div>
       </section>
     </main>
