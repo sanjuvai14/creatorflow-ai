@@ -1,0 +1,76 @@
+import Link from "next/link";
+
+const plans = [
+  {
+    name: "Free",
+    price: "$0",
+    note: "Try CreatorFlow AI before upgrading",
+    credits: "10 credits",
+    features: ["YouTube content tools", "Shorts & Reels", "Social posts", "Product copy", "Visual Creator demo"],
+    cta: "Start Free",
+    href: "/login",
+  },
+  {
+    name: "Creator",
+    price: "$9",
+    note: "Planned paid plan",
+    credits: "Higher monthly credit allowance",
+    features: ["Everything in Free", "More AI generations", "Persistent saved visuals", "Priority workspace experience", "No public demo limitations"],
+    cta: "Coming Soon",
+    href: "/login",
+  },
+  {
+    name: "Pro",
+    price: "$19",
+    note: "Planned for serious creators",
+    credits: "Largest monthly credit allowance",
+    features: ["Everything in Creator", "More generation capacity", "Advanced creator workflows", "Built for frequent publishing", "Priority support planned"],
+    cta: "Coming Soon",
+    href: "/login",
+  },
+];
+
+export default function PricingPage() {
+  return (
+    <main style={{ minHeight: "100vh", padding: "24px 20px 70px" }}>
+      <nav style={{ maxWidth: 1180, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
+        <Link href="/" style={{ fontWeight: 900, fontSize: 22 }}>Creator<span style={{ color: "#8b7cff" }}>Flow</span> <span style={{ fontSize: 12, opacity: .75 }}>AI</span></Link>
+        <Link href="/login" className="cf-btn">Sign in</Link>
+      </nav>
+
+      <section style={{ maxWidth: 980, margin: "58px auto 0", textAlign: "center" }}>
+        <div className="cf-eyebrow">SIMPLE CREATOR PRICING</div>
+        <h1 style={{ fontSize: "clamp(38px,8vw,68px)", lineHeight: 1, letterSpacing: -2, margin: "16px 0" }}>
+          Create more. <span style={{ background: "linear-gradient(90deg,#9b87ff,#22d3ee)", WebkitBackgroundClip: "text", color: "transparent" }}>Grow smarter.</span>
+        </h1>
+        <p className="cf-muted" style={{ maxWidth: 650, margin: "0 auto", lineHeight: 1.65 }}>
+          Start free, then upgrade when CreatorFlow becomes part of your regular publishing workflow. Paid checkout is being prepared and these paid prices are planned, not active purchases yet.
+        </p>
+      </section>
+
+      <section style={{ maxWidth: 1180, margin: "46px auto 0", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(245px,1fr))", gap: 18 }}>
+        {plans.map((plan, index) => (
+          <div className="cf-card cf-glow" key={plan.name} style={{ padding: 26, position: "relative", border: index === 1 ? "1px solid rgba(139,124,255,.55)" : undefined }}>
+            {index === 1 && <div className="cf-eyebrow" style={{ position: "absolute", top: 18, right: 18 }}>PLANNED</div>}
+            <h2 style={{ margin: 0, fontSize: 24 }}>{plan.name}</h2>
+            <div style={{ marginTop: 18, fontSize: 42, fontWeight: 900 }}>{plan.price}<span style={{ fontSize: 14, opacity: .6 }}>{plan.price !== "$0" ? "/month" : "/forever"}</span></div>
+            <p className="cf-muted" style={{ minHeight: 42, lineHeight: 1.5 }}>{plan.note}</p>
+            <div style={{ fontWeight: 800, margin: "20px 0 14px" }}>{plan.credits}</div>
+            <ul style={{ margin: "0 0 24px", paddingLeft: 20, lineHeight: 1.9 }}>
+              {plan.features.map((feature) => <li key={feature}>{feature}</li>)}
+            </ul>
+            <Link href={plan.href} className={index === 0 ? "cf-btn" : "cf-icon-btn"} style={{ display: "block", textAlign: "center", width: "100%", boxSizing: "border-box" }}>
+              {plan.cta}
+            </Link>
+          </div>
+        ))}
+      </section>
+
+      <section style={{ maxWidth: 820, margin: "34px auto 0" }}>
+        <div className="cf-card" style={{ padding: 24 }}>
+          <strong>Important:</strong> the Creator and Pro prices above are planning targets. No payment is collected from this page yet. The next billing phase will add a secure checkout, subscription records, webhook verification and server-side plan/credit enforcement before real payments are enabled.
+        </div>
+      </section>
+    </main>
+  );
+}
