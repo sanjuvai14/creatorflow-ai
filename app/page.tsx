@@ -13,7 +13,10 @@ export default function Home() {
     <main style={{ minHeight: "100vh", overflow: "hidden" }}>
       <nav style={{ maxWidth: 1180, margin: "0 auto", padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16 }}>
         <Link href="/" style={{ fontWeight: 900, fontSize: 22, letterSpacing: -.5 }}>Creator<span style={{ color: "#8b7cff" }}>Flow</span> <span style={{ fontSize: 12, opacity: .75 }}>AI</span></Link>
-        <Link href="/login" className="cf-btn">Sign in</Link>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <Link href="/pricing" className="cf-icon-btn">Pricing</Link>
+          <Link href="/login" className="cf-btn">Sign in</Link>
+        </div>
       </nav>
 
       <section style={{ maxWidth: 1050, margin: "48px auto 0", padding: "34px 20px 20px", textAlign: "center" }}>
@@ -26,6 +29,7 @@ export default function Home() {
         </p>
         <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
           <Link href="/login" className="cf-btn">Start Creating Free →</Link>
+          <Link href="/pricing" className="cf-icon-btn">View Plans</Link>
           <a href="#tools" className="cf-icon-btn" style={{ display: "inline-flex", alignItems: "center" }}>Explore Tools</a>
         </div>
         <div className="cf-muted" style={{ marginTop: 18, fontSize: 12 }}>Built for creators · Works on phone, tablet and PC</div>
