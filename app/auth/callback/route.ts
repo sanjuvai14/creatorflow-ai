@@ -4,9 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+  const next = url.searchParams.get("next");
+  const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+
   if (code) {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("error", "auth_callback_failed");
+      return NextResponse.redirect(loginUrl);
+    }
   }
-  return NextResponse.redirect(new URL("/dashboard", request.url));
+
+  return NextResponse.redirect(new URL(safeNext, request.url));
 }
