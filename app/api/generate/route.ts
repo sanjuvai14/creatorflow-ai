@@ -30,7 +30,8 @@ export async function POST(req: Request) {
         output = response.output_text;
       }
     } catch {
-      return NextResponse.json({ error: "AI generation failed. Your credit was reserved; please try again." }, { status: 502 });
+      const { data: refundedCredits } = await supabase.rpc("refund_credit", { p_user_id: user.id });
+      return NextResponse.json({ error: "AI generation failed. Your credit has been returned; please try again.", credits: refundedCredits ?? credits }, { status: 502 });
     }
 
     const { error: genError } = await supabase.from("generations").insert({
