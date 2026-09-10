@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import AuthForm from "@/components/AuthForm";
 
 export default function LoginPage() {
@@ -9,7 +10,9 @@ export default function LoginPage() {
           <p className="cf-muted" style={{margin:"8px 0 0"}}>Sign in and start creating in seconds</p>
         </div>
         <div className="cf-card" style={{padding:"clamp(20px,5vw,30px)"}}>
-          <AuthForm />
+          <Suspense fallback={<div className="cf-muted" style={{textAlign:"center", padding:20}}>Loading…</div>}>
+            <AuthForm />
+          </Suspense>
         </div>
         <p className="cf-muted" style={{textAlign:"center", fontSize:12, marginTop:16}}>Works smoothly on phone, tablet and PC.</p>
       </div>
