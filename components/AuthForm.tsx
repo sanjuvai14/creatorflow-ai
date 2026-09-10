@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AuthForm() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -12,7 +12,11 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") || "/dashboard";
+  const requestedNext = searchParams.get("next") || "/dashboard";
+  const next = requestedNext.startsWith("/") && !requestedNext.startsWith("//")
+    ? requestedNext
+    : "/dashboard";
+  const routeNext = next as Parameters<typeof router.replace>[0];
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,7 +32,7 @@ export default function AuthForm() {
 
     if (mode === "signup") {
       if (result.data.session) {
-        router.replace(next);
+        router.replace(routeNext);
         router.refresh();
       } else {
         setMsg("Account created. Check your email to confirm your account, then log in.");
@@ -36,7 +40,7 @@ export default function AuthForm() {
       return;
     }
 
-    router.replace(next);
+    router.replace(routeNext);
     router.refresh();
   }
 
@@ -45,7 +49,9 @@ export default function AuthForm() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      },
     });
     if (error) setMsg(error.message);
   }
