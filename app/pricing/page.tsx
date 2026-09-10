@@ -8,7 +8,7 @@ const plans = [
     credits: "10 credits",
     features: ["YouTube content tools", "Shorts & Reels", "Social posts", "Product copy", "Visual Creator demo"],
     cta: "Start Free",
-    href: "/login",
+    href: "/login" as const,
   },
   {
     name: "Creator",
@@ -17,7 +17,7 @@ const plans = [
     credits: "Higher monthly credit allowance",
     features: ["Everything in Free", "More AI generations", "Persistent saved visuals", "Priority workspace experience", "No public demo limitations"],
     cta: "Coming Soon",
-    href: "/login",
+    href: "/login" as const,
   },
   {
     name: "Pro",
@@ -26,7 +26,7 @@ const plans = [
     credits: "Largest monthly credit allowance",
     features: ["Everything in Creator", "More generation capacity", "Advanced creator workflows", "Built for frequent publishing", "Priority support planned"],
     cta: "Coming Soon",
-    href: "/login",
+    href: "/login" as const,
   },
 ];
 
