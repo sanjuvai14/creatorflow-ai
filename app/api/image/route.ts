@@ -20,9 +20,10 @@ export async function POST(req: Request) {
     }
 
     if (!process.env.OPENAI_API_KEY) {
+      const { data: refundedCredits } = await supabase.rpc("refund_credit", { p_user_id: user.id });
       return NextResponse.json({
         demo: true,
-        credits,
+        credits: refundedCredits ?? credits,
         prompt: `DEMO IMAGE PROMPT\n\nType: ${type}\nStyle: ${style}\nRatio: ${aspectRatio}\nText: ${text || "None"}\n\n${prompt}`,
       });
     }
@@ -38,7 +39,11 @@ export async function POST(req: Request) {
         n: 1,
       });
       const image = result.data?.[0];
-      return NextResponse.json({ imageUrl: image?.url || null, revisedPrompt: image?.revised_prompt || finalPrompt, credits });
+      if (!image?.url) {
+        const { data: refundedCredits } = await supabase.rpc("refund_credit", { p_user_id: user.id });
+        return NextResponse.json({ error: "AI image generation returned no image. Your credit has been returned.", credits: refundedCredits ?? credits }, { status: 502 });
+      }
+      return NextResponse.json({ imageUrl: image.url, revisedPrompt: image.revised_prompt || finalPrompt, credits });
     } catch {
       const { data: refundedCredits } = await supabase.rpc("refund_credit", { p_user_id: user.id });
       return NextResponse.json({ error: "AI image generation failed. Your credit has been returned; please try again.", credits: refundedCredits ?? credits }, { status: 502 });
