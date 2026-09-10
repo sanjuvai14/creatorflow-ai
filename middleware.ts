@@ -6,6 +6,7 @@ export async function middleware(request: NextRequest) {
   const protectedPath =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/history") ||
+    pathname.startsWith("/settings") ||
     pathname.startsWith("/api/");
 
   // Do not let a missing Vercel env var crash the entire site at the Edge.
@@ -77,5 +78,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/history/:path*", "/api/:path*", "/login"],
+  matcher: ["/dashboard/:path*", "/history/:path*", "/settings/:path*", "/api/:path*", "/login"],
 };
