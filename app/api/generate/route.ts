@@ -71,7 +71,15 @@ export async function POST(req: Request) {
       input_text: topic,
       output_text: output,
     });
-    if (genError) return NextResponse.json({ output, credits, warning: "Content generated, but history could not be saved." }, { status: 200 });
+    if (genError) {
+      const refund = await refundCredit(user.id);
+      return NextResponse.json({
+        output,
+        error: refund.ok ? "Content generated, but history could not be saved. Your credit has been returned." : "Content generated, but history could not be saved and the credit could not be returned automatically.",
+        credits: refund.credits ?? credits,
+        warning: "Please try saving the content again later.",
+      }, { status: 200 });
+    }
 
     return NextResponse.json({ output, credits });
   } catch {
