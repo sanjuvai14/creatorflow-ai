@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const MAX_REQUEST_BYTES = 64 * 1024;
 
 function isAllowedImageHost(value: string) {
   try {
@@ -16,13 +17,18 @@ function isAllowedImageHost(value: string) {
 
 export async function POST(req: Request) {
   try {
+    const contentLength = Number(req.headers.get("content-length") || "0");
+    if (contentLength > MAX_REQUEST_BYTES) {
+      return NextResponse.json({ error: "Request is too large." }, { status: 413 });
+    }
+
     const body = await req.json().catch(() => ({}));
     const imageUrl = typeof body.imageUrl === "string" ? body.imageUrl.trim() : "";
     const title = typeof body.title === "string" ? body.title.trim().slice(0, 120) : "Generated visual";
     const imageType = typeof body.imageType === "string" ? body.imageType.trim().slice(0, 60) : "generated";
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 2000) : null;
 
-    if (!imageUrl || !isAllowedImageHost(imageUrl)) {
+    if (!imageUrl || imageUrl.length > 4096 || !isAllowedImageHost(imageUrl)) {
       return NextResponse.json({ error: "This image cannot be saved from that source." }, { status: 400 });
     }
 
@@ -38,6 +44,11 @@ export async function POST(req: Request) {
     });
     if (!imageResponse.ok) {
       return NextResponse.json({ error: "The generated image is no longer available. Please generate it again." }, { status: 502 });
+    }
+
+    const responseLength = Number(imageResponse.headers.get("content-length") || "0");
+    if (responseLength > MAX_IMAGE_BYTES) {
+      return NextResponse.json({ error: "Image is too large to save." }, { status: 413 });
     }
 
     const contentType = imageResponse.headers.get("content-type")?.split(";")[0]?.toLowerCase() || "";
