@@ -35,7 +35,14 @@ export async function POST(req: Request) {
 
     try {
       if (!process.env.OPENAI_API_KEY) {
-        return NextResponse.json({ demo: true, imageUrl: null, revisedPrompt: prompt, credits, warning: "Image generation is in demo mode. Add OPENAI_API_KEY to enable live image generation." });
+        const refund = await refundCredit(user.id);
+        return NextResponse.json({
+          demo: true,
+          imageUrl: null,
+          revisedPrompt: prompt,
+          credits: refund.credits ?? credits,
+          warning: "Image generation is temporarily unavailable because the AI image service is not configured. Your credit was not used."
+        }, { status: 503 });
       }
       const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       const size = aspectRatio === "1:1" ? "1024x1024" : "1536x1024";
