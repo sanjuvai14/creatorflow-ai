@@ -23,7 +23,10 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
 
-    const { data: credits, error: creditError } = await supabase.rpc("consume_credit", { p_user_id: user.id });
+    // Credit mutation is a privileged server-side operation. Authentication is
+    // verified above, then the service-role client calls the protected RPC.
+    const admin = createAdminClient();
+    const { data: credits, error: creditError } = await admin.rpc("consume_credit", { p_user_id: user.id });
     if (creditError) {
       const message = creditError.message?.toLowerCase() || "";
       if (message.includes("no credits")) return NextResponse.json({ error: "No credits left. Please upgrade or wait for your next credit reset." }, { status: 402 });
