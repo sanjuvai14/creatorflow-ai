@@ -6,11 +6,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const MAX_TOPIC_LENGTH = 5000;
 const MAX_PAYLOAD_BYTES = 12000;
 
-async function consumeCredit(userId: string) {
-  const admin = createAdminClient();
-  return admin.rpc("consume_credit_service", { p_user_id: userId });
-}
-
 async function refundCredit(userId: string) {
   try {
     const admin = createAdminClient();
@@ -43,16 +38,11 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
 
-    let credits: number | null = null;
-    try {
-      const result = await consumeCredit(user.id);
-      credits = result.data;
-      if (result.error) {
-        const message = result.error.message?.toLowerCase() || "";
-        if (message.includes("no credits")) return NextResponse.json({ error: "No credits left. Please upgrade or wait for your next credit reset." }, { status: 402 });
-        return NextResponse.json({ error: "Could not reserve a credit." }, { status: 500 });
-      }
-    } catch {
+    const { data: credits, error: creditError } = await supabase.rpc("consume_credit", { p_user_id: user.id });
+    if (creditError) {
+      const message = creditError.message?.toLowerCase() || "";
+      if (message.includes("no credits")) return NextResponse.json({ error: "No credits left. Please upgrade or wait for your next credit reset." }, { status: 402 });
+      if (message.includes("not authorized")) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
       return NextResponse.json({ error: "Could not reserve a credit." }, { status: 500 });
     }
 
