@@ -1,0 +1,3 @@
+import { Suspense } from "react";
+import AuthForm from "@/components/AuthForm";
+export default function LoginPage(){return <main style={{minHeight:"100vh",display:"grid",placeItems:"center",padding:"24px 16px"}}><div style={{width:"100%",maxWidth:460}}><div style={{textAlign:"center",marginBottom:22}}><div style={{fontWeight:900,fontSize:28}}>Creator<span style={{color:"#8b7cff"}}>Flow</span> <span style={{fontSize:13,opacity:.75}}>AI</span></div><p className="cf-muted">Sign in and start creating in seconds</p></div><div className="cf-card" style={{padding:"clamp(20px,5vw,30px)"}}><Suspense fallback={<div className="cf-muted" style={{textAlign:"center",padding:20}}>Loading…</div>}><AuthForm/></Suspense></div></div></main>}
