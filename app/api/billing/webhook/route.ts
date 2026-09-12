@@ -5,9 +5,17 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const runtime = "nodejs";
 
 const MAX_BODY_BYTES = 1024 * 1024;
-const TIMESTAMP_TOLERANCE_SECONDS = 5;
+// Paddle recommends rejecting signatures with an old timestamp to reduce replay risk.
+const TIMESTAMP_TOLERANCE_SECONDS = 300;
 
-function verifyPaddleSignature(rawBody: string, signatureHeader: string, secret: string) {
+function getWebhookSecrets() {
+  return [
+    process.env.PADDLE_WEBHOOK_SECRET_KEY,
+    process.env.PADDLE_WEBHOOK_SECRET_KEY_SECONDARY,
+  ].filter((value): value is string => Boolean(value?.trim()));
+}
+
+function verifyPaddleSignature(rawBody: string, signatureHeader: string, secrets: string[]) {
   const parts = signatureHeader.split(";");
   const values = new Map<string, string>();
 
@@ -25,16 +33,17 @@ function verifyPaddleSignature(rawBody: string, signatureHeader: string, secret:
   if (age > TIMESTAMP_TOLERANCE_SECONDS) return false;
 
   const signedPayload = `${timestamp}:${rawBody}`;
-  const computed = createHmac("sha256", secret).update(signedPayload).digest("hex");
-  const expected = Buffer.from(expectedSignature, "utf8");
-  const actual = Buffer.from(computed, "utf8");
+  const expected = Buffer.from(expectedSignature, "hex");
 
-  return expected.length === actual.length && timingSafeEqual(expected, actual);
+  return secrets.some((secret) => {
+    const computed = createHmac("sha256", secret).update(signedPayload).digest();
+    return expected.length === computed.length && timingSafeEqual(expected, computed);
+  });
 }
 
 export async function POST(request: Request) {
-  const secret = process.env.PADDLE_WEBHOOK_SECRET_KEY;
-  if (!secret) {
+  const secrets = getWebhookSecrets();
+  if (secrets.length === 0) {
     return NextResponse.json({ error: "Webhook is not configured." }, { status: 503 });
   }
 
@@ -48,13 +57,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Webhook payload too large." }, { status: 413 });
   }
 
-  if (!verifyPaddleSignature(rawBody, signature, secret)) {
+  if (!verifyPaddleSignature(rawBody, signature, secrets)) {
     return NextResponse.json({ error: "Invalid webhook signature." }, { status: 401 });
   }
 
-  let event: { event_id?: string; event_type?: string; data?: unknown };
+  let event: { event_id?: string; event_type?: string };
   try {
-    event = JSON.parse(rawBody) as { event_id?: string; event_type?: string; data?: unknown };
+    event = JSON.parse(rawBody) as { event_id?: string; event_type?: string };
   } catch {
     return NextResponse.json({ error: "Invalid webhook payload." }, { status: 400 });
   }
@@ -80,7 +89,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not record webhook event." }, { status: 500 });
   }
 
-  // Sandbox phase: record verified events first. Subscription entitlement changes
-  // will only be enabled after Paddle product/price IDs and customer metadata are configured.
+  // Sandbox phase: record verified events first. Entitlements remain disabled
+  // until Paddle product/price IDs and customer metadata are configured.
   return NextResponse.json({ ok: true, received: true, eventType });
 }
