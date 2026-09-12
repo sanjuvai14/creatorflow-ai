@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-function signState(userId: string, nonce: string, secret: string) {
-  return crypto.createHmac("sha256", secret).update(`${userId}.${nonce}`).digest("base64url");
+function signState(payload: string, secret: string) {
+  return crypto.createHmac("sha256", secret).update(payload).digest("base64url");
 }
 
 export async function GET(request: Request) {
@@ -19,8 +19,8 @@ export async function GET(request: Request) {
   }
 
   const nonce = crypto.randomBytes(32).toString("base64url");
-  const signature = signState(user.id, nonce, encryptionKey);
-  const state = `${nonce}.${signature}`;
+  const payload = Buffer.from(JSON.stringify({ userId: user.id, nonce }), "utf8").toString("base64url");
+  const state = `${payload}.${signState(payload, encryptionKey)}`;
   const response = NextResponse.redirect(new URL("https://accounts.google.com/o/oauth2/v2/auth"));
   response.headers.set("Location", `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
     client_id: clientId,
