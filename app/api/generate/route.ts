@@ -31,7 +31,7 @@ export async function POST(req:Request){
   const {data:allowed,error:rateError}=await admin.rpc("check_generation_rate_limit",{p_user_id:user.id,p_limit:RATE_LIMIT,p_window_seconds:RATE_WINDOW_SECONDS});
   if(rateError)return NextResponse.json({error:"Could not verify request limit. Please try again later."},{status:503});
   if(!allowed)return NextResponse.json({error:"Generation limit reached. Please try again later."},{status:429,headers:{"Retry-After":String(RATE_WINDOW_SECONDS)}});
-  const {data:credits,error:creditError}=await supabase.rpc("consume_credit",{p_user_id:user.id});
+  const {data:credits,error:creditError}=await admin.rpc("consume_credit",{p_user_id:user.id});
   if(creditError){const message=creditError.message?.toLowerCase()||""; if(message.includes("no credits"))return NextResponse.json({error:"No credits left. Please upgrade or wait for your next credit reset."},{status:402}); if(message.includes("not authorized"))return NextResponse.json({error:"Not authorized."},{status:403}); return NextResponse.json({error:"Could not reserve a credit."},{status:500});}
   let output="";
   try{
