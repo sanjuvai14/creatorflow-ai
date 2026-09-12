@@ -3,16 +3,18 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { encryptSecret } from "@/lib/integrations/crypto";
 
-function verifyState(state: string, secret: string) {
-  const parts = state.split(".");
-  if (parts.length !== 2) return null;
-  const [nonce, signature] = parts;
-  if (!nonce || !signature) return null;
-  return { nonce, signature };
-}
-
-function expectedSignature(userId: string, nonce: string, secret: string) {
-  return crypto.createHmac("sha256", secret).update(`${userId}.${nonce}`).digest("base64url");
+function parseSignedState(state: string, secret: string) {
+  const [payload, signature] = state.split(".");
+  if (!payload || !signature) return null;
+  const expected = crypto.createHmac("sha256", secret).update(payload).digest("base64url");
+  const a = Buffer.from(signature);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { userId?: string; nonce?: string };
+    if (!parsed.userId || !parsed.nonce) return null;
+    return parsed;
+  } catch { return null; }
 }
 
 export async function GET(request: Request) {
@@ -30,16 +32,50 @@ export async function GET(request: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || url.origin;
   if (!clientId || !clientSecret || !encryptionKey) return fail("provider_not_configured");
 
-  const parsedState = verifyState(state, encryptionKey);
-  if (!parsedState) return fail("invalid_oauth_state");
+  const signedState = parseSignedState(state, encryptionKey);
+  if (!signedState) return fail("invalid_oauth_state");
+  const userId = signedState.userId;
 
-  const userId = await (async () => {
-    const admin = createAdminClient();
-    const { data, error } = await admin.auth.admin.getUserById(state ? "" : "");
-    void data; void error;
-    return null;
-  })();
-  void userId;
+  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: `${appUrl}/api/integrations/youtube/callback`,
+      grant_type: "authorization_code",
+    }),
+  });
+  if (!tokenResponse.ok) return fail("token_exchange_failed");
+  const token = await tokenResponse.json() as { access_token?: string; refresh_token?: string; expires_in?: number; token_type?: string };
+  if (!token.access_token) return fail("missing_access_token");
 
-  return fail("invalid_oauth_state");
+  const channelResponse = await fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", {
+    headers: { Authorization: `Bearer ${token.access_token}` },
+  });
+  if (!channelResponse.ok) return fail("youtube_validation_failed");
+  const channelData = await channelResponse.json() as { items?: Array<{ id?: string; snippet?: { title?: string } }> };
+  const channel = channelData.items?.[0];
+  if (!channel?.id) return fail("youtube_channel_not_found");
+
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("platform_connections").upsert({
+    user_id: userId,
+    platform: "youtube",
+    status: "connected",
+    external_account_id: channel.id,
+    external_account_name: channel.snippet?.title || "YouTube channel",
+    scopes: ["https://www.googleapis.com/auth/youtube.readonly"],
+    access_token_encrypted: encryptSecret(token.access_token),
+    refresh_token_encrypted: token.refresh_token ? encryptSecret(token.refresh_token) : null,
+    token_type: token.token_type || "Bearer",
+    expires_at: token.expires_in ? new Date(Date.now() + token.expires_in * 1000).toISOString() : null,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "user_id,platform" });
+
+  if (error) return fail("connection_save_failed");
+  const response = NextResponse.redirect(new URL("/settings?integration=youtube&connected=1", request.url));
+  response.cookies.delete("creatorflow_oauth_state");
+  return response;
 }
