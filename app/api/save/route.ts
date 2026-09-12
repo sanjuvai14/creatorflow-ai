@@ -1,18 +1,38 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const MAX_BODY_BYTES = 40000;
 const MAX_TITLE = 120;
 const MAX_TYPE = 40;
 const MAX_CONTENT = 30000;
 
 export async function POST(req: Request) {
+  const declaredLength = req.headers.get("content-length");
+  if (declaredLength) {
+    const length = Number(declaredLength);
+    if (!Number.isFinite(length) || length < 0 || length > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Request is too large." }, { status: 413 });
+    }
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  let raw: string;
+  try {
+    raw = await req.text();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  if (new TextEncoder().encode(raw).byteLength > MAX_BODY_BYTES) {
+    return NextResponse.json({ error: "Request is too large." }, { status: 413 });
+  }
+
   let body: { title?: unknown; type?: unknown; content?: unknown };
   try {
-    body = await req.json();
+    body = JSON.parse(raw);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
