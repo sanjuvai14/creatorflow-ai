@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { encryptSecret } from "@/lib/integrations/crypto";
 
+const OAUTH_STATE_MAX_AGE_MS = 10 * 60 * 1000;
+
+type SignedState = { userId?: string; nonce?: string; issuedAt?: number };
+
 function parseSignedState(state: string, secret: string) {
   const [payload, signature] = state.split(".");
   if (!payload || !signature) return null;
@@ -11,8 +15,9 @@ function parseSignedState(state: string, secret: string) {
   const b = Buffer.from(expected);
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
   try {
-    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as { userId?: string; nonce?: string };
-    if (!parsed.userId || !parsed.nonce) return null;
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as SignedState;
+    if (!parsed.userId || !parsed.nonce || !Number.isFinite(parsed.issuedAt)) return null;
+    if (Math.abs(Date.now() - parsed.issuedAt!) > OAUTH_STATE_MAX_AGE_MS) return null;
     return parsed;
   } catch { return null; }
 }
@@ -34,7 +39,7 @@ export async function GET(request: Request) {
 
   const signedState = parseSignedState(state, encryptionKey);
   if (!signedState) return fail("invalid_oauth_state");
-  const userId = signedState.userId;
+  const userId = signedState.userId!;
 
   const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
