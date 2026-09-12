@@ -19,7 +19,8 @@ export async function GET(request: Request) {
   }
 
   const nonce = crypto.randomBytes(32).toString("base64url");
-  const payload = Buffer.from(JSON.stringify({ userId: user.id, nonce }), "utf8").toString("base64url");
+  const issuedAt = Date.now();
+  const payload = Buffer.from(JSON.stringify({ userId: user.id, nonce, issuedAt }), "utf8").toString("base64url");
   const state = `${payload}.${signState(payload, encryptionKey)}`;
   const response = NextResponse.redirect(new URL("https://accounts.google.com/o/oauth2/v2/auth"));
   response.headers.set("Location", `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
