@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 const allowedTables = new Set(["saved_content", "generations", "saved_images"]);
+const MAX_BODY_BYTES = 2_000;
+const MAX_ID_LENGTH = 100;
 
 export async function DELETE(req: Request) {
   try {
@@ -10,12 +12,33 @@ export async function DELETE(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+    const declaredLength = Number(req.headers.get("content-length") || 0);
+    if (declaredLength > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Request body too large" }, { status: 413 });
+    }
+
+    let raw = "";
+    try {
+      raw = await req.text();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+    if (new TextEncoder().encode(raw).byteLength > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Request body too large" }, { status: 413 });
+    }
+
     let body: { id?: unknown; table?: unknown };
-    try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid request body" }, { status: 400 }); }
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
 
     const id = typeof body.id === "string" ? body.id.trim() : "";
     const table = typeof body.table === "string" ? body.table : "";
-    if (!id || !allowedTables.has(table)) return NextResponse.json({ error: "Invalid delete request" }, { status: 400 });
+    if (!id || id.length > MAX_ID_LENGTH || !allowedTables.has(table)) {
+      return NextResponse.json({ error: "Invalid delete request" }, { status: 400 });
+    }
 
     let imageUrl: string | null = null;
     if (table === "saved_images") {
