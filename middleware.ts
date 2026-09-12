@@ -6,7 +6,7 @@ const FALLBACK_SUPABASE_KEY = "sb_publishable_a5EYf9js-rdRpjeLlJVvzg_AEKHMVr8";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const protectedPath = pathname.startsWith("/dashboard") || pathname.startsWith("/history") || pathname.startsWith("/images") || pathname.startsWith("/settings") || pathname.startsWith("/api/");
+  const protectedPath = pathname.startsWith("/dashboard") || pathname.startsWith("/history") || pathname.startsWith("/images") || pathname.startsWith("/settings") || pathname.startsWith("/platforms") || pathname.startsWith("/api/");
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_SUPABASE_KEY;
@@ -69,5 +69,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/history/:path*", "/images/:path*", "/settings/:path*", "/api/:path*", "/login"],
+  matcher: ["/dashboard/:path*", "/history/:path*", "/images/:path*", "/settings/:path*", "/platforms/:path*", "/api/:path*", "/login"],
 };
