@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { encryptSecret } from "@/lib/integrations/crypto";
 
@@ -41,6 +42,13 @@ export async function GET(request: Request) {
   if (!signedState) return fail("invalid_oauth_state");
   const userId = signedState.userId!;
 
+  // Bind the callback to the currently authenticated Supabase session as well
+  // as the signed, HttpOnly OAuth state cookie. This prevents a valid state from
+  // being replayed from a different logged-in account.
+  const sessionClient = await createClient();
+  const { data: { user: sessionUser } } = await sessionClient.auth.getUser();
+  if (!sessionUser || sessionUser.id !== userId) return fail("session_mismatch");
+
   const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -65,6 +73,13 @@ export async function GET(request: Request) {
   if (!channel?.id) return fail("youtube_channel_not_found");
 
   const supabase = createAdminClient();
+  const { data: existing } = await supabase
+    .from("platform_connections")
+    .select("refresh_token_encrypted")
+    .eq("user_id", userId)
+    .eq("platform", "youtube")
+    .maybeSingle();
+
   const { error } = await supabase.from("platform_connections").upsert({
     user_id: userId,
     platform: "youtube",
@@ -73,7 +88,11 @@ export async function GET(request: Request) {
     external_account_name: channel.snippet?.title || "YouTube channel",
     scopes: ["https://www.googleapis.com/auth/youtube.readonly"],
     access_token_encrypted: encryptSecret(token.access_token),
-    refresh_token_encrypted: token.refresh_token ? encryptSecret(token.refresh_token) : null,
+    // Google may omit refresh_token on re-consent. Preserve the existing one
+    // so reconnecting cannot silently break future background access.
+    refresh_token_encrypted: token.refresh_token
+      ? encryptSecret(token.refresh_token)
+      : existing?.refresh_token_encrypted ?? null,
     token_type: token.token_type || "Bearer",
     expires_at: token.expires_in ? new Date(Date.now() + token.expires_in * 1000).toISOString() : null,
     updated_at: new Date().toISOString(),
