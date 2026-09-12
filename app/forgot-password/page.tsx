@@ -6,7 +6,7 @@ import {createClient} from "@/lib/supabase/client";
 export default function ForgotPassword(){
  const[email,setEmail]=useState(""); const[msg,setMsg]=useState(""); const[loading,setLoading]=useState(false);
  async function submit(e:FormEvent){e.preventDefault();if(loading)return;setLoading(true);setMsg("");
-  try{const supabase=createClient();const{error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:`${window.location.origin}/reset-password`});
+  try{const supabase=createClient();const{error}=await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(),{redirectTo:`${window.location.origin}/auth/callback?next=/reset-password`});
    if(error){setMsg(error.message);return} setMsg("If an account uses this email, a password reset link has been sent. Check your inbox.");
   }catch(error){setMsg(`Unable to send reset email: ${error instanceof Error?error.message:"Unknown error"}`)}finally{setLoading(false)}
  }
