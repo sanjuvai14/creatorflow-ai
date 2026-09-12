@@ -27,7 +27,8 @@ export async function POST(req:Request){
   if(topic.length>MAX_TOPIC_LENGTH)return NextResponse.json({error:"Topic is too long. Please keep it under 5,000 characters."},{status:400});
   const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser();
   if(!user)return NextResponse.json({error:"Please log in first."},{status:401});
-  const {data:allowed,error:rateError}=await supabase.rpc("check_generation_rate_limit",{p_user_id:user.id,p_limit:RATE_LIMIT,p_window_seconds:RATE_WINDOW_SECONDS});
+  const admin=createAdminClient();
+  const {data:allowed,error:rateError}=await admin.rpc("check_generation_rate_limit",{p_user_id:user.id,p_limit:RATE_LIMIT,p_window_seconds:RATE_WINDOW_SECONDS});
   if(rateError)return NextResponse.json({error:"Could not verify request limit. Please try again later."},{status:503});
   if(!allowed)return NextResponse.json({error:"Generation limit reached. Please try again later."},{status:429,headers:{"Retry-After":String(RATE_WINDOW_SECONDS)}});
   const {data:credits,error:creditError}=await supabase.rpc("consume_credit",{p_user_id:user.id});
