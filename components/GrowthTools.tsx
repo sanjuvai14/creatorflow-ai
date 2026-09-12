@@ -9,7 +9,7 @@ export default function GrowthTools({tool,platform=""}:Props){
  const Field=({label,id,suffix}:{label:string,id:string,suffix?:string})=><label style={{display:"grid",gap:6,fontSize:13}}>{label}<div style={{display:"flex",alignItems:"center",gap:6}}><input className="cf-input" inputMode="decimal" min="0" value={g(id)} onChange={e=>set(id,e.target.value)}/>{suffix&&<span className="cf-muted">{suffix}</span>}</div></label>;
  const watch=useMemo(()=>num(g("views"))*num(g("duration"))*Math.min(100,num(g("retention")))/6000,[x]);
  const days=useMemo(()=>num(g("growth"))?(num(g("targetSubs"))-num(g("currentSubs")))/num(g("growth")):0,[x]);
- const fdays=useMemo(()=>num(g("dailyFollowers"))?(num(g("targetFollowers"))-num(g("currentFollowers"))/num(g("dailyFollowers"))):0,[x]);
+ const fdays=useMemo(()=>num(g("dailyFollowers"))?(num(g("targetFollowers"))-num(g("currentFollowers")))/num(g("dailyFollowers")):0,[x]);
  const ret=useMemo(()=>num(g("duration"))?Math.min(100,num(g("avgWatch"))/num(g("duration"))*100):0,[x]);
  const isFollower=tool.toLowerCase().includes("follower");
  const isSubscriber=tool.toLowerCase().includes("subscriber");
