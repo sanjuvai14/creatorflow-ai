@@ -1,82 +1,12 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AuthForm(){
-  const[mode,setMode]=useState<"login"|"signup">("login");
-  const[email,setEmail]=useState("");
-  const[password,setPassword]=useState("");
-  const[phone,setPhone]=useState("");
-  const[msg,setMsg]=useState("");
-  const[loading,setLoading]=useState(false);
-  const router=useRouter();
-  const searchParams=useSearchParams();
-  const requestedNext=searchParams.get("next")||"/dashboard";
-  const next=requestedNext.startsWith("/")&&!requestedNext.startsWith("//")?requestedNext:"/dashboard";
-
-  async function submit(e:React.FormEvent){
-    e.preventDefault();
-    if(loading)return;
-    setLoading(true);
-    setMsg("");
-    const normalizedEmail=email.trim().toLowerCase();
-    try{
-      const supabase=createClient();
-      const result=mode==="login"
-        ?await supabase.auth.signInWithPassword({email:normalizedEmail,password})
-        :await supabase.auth.signUp({
-            email:normalizedEmail,
-            password,
-            options:{
-              data:{phone:phone.trim()},
-              emailRedirectTo:`${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`
-            }
-          });
-      if(result.error){
-        setMsg(result.error.message);
-        return;
-      }
-      if(mode==="signup"&&!result.data.session){
-        setMsg("Account created. Check your email to confirm your account, then log in.");
-        return;
-      }
-      router.replace(next as Parameters<typeof router.replace>[0]);
-      router.refresh();
-    }catch(error){
-      const message=error instanceof Error?error.message:"Unknown authentication error";
-      console.error("CreatorFlow authentication error:",error);
-      setMsg(`Authentication failed: ${message}`);
-    }finally{
-      setLoading(false);
-    }
-  }
-
-  async function google(){
-    setMsg("");
-    try{
-      const supabase=createClient();
-      const{error}=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:`${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`}});
-      if(error)setMsg(error.message);
-    }catch(error){
-      const message=error instanceof Error?error.message:"Unknown authentication error";
-      setMsg(`Authentication failed: ${message}`);
-    }
-  }
-
-  return <div className="cf-card" style={{padding:26}}>
-    <div style={{display:"flex",gap:8,marginBottom:20}}>
-      <button type="button" className="cf-btn" style={{flex:1,opacity:mode==="login"?1:.45}} onClick={()=>{setMode("login");setMsg("")}}>Login</button>
-      <button type="button" className="cf-btn" style={{flex:1,opacity:mode==="signup"?1:.45}} onClick={()=>{setMode("signup");setMsg("")}}>Sign up</button>
-    </div>
-    <form onSubmit={submit} style={{display:"grid",gap:12}}>
-      <input className="cf-input" placeholder="Email" type="email" value={email} onChange={e=>setEmail(e.target.value)} required autoComplete="email"/>
-      <input className="cf-input" placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} autoComplete={mode==="login"?"current-password":"new-password"}/>
-      {mode==="signup"&&<input className="cf-input" placeholder="Phone number (optional)" value={phone} onChange={e=>setPhone(e.target.value)} autoComplete="tel"/>}
-      <button className="cf-btn" disabled={loading}>{loading?"Please wait...":mode==="login"?"Login":"Create account"}</button>
-    </form>
-    <div style={{textAlign:"center",margin:"18px 0"}} className="cf-muted">or</div>
-    <button type="button" className="cf-btn" style={{width:"100%",background:"rgba(255,255,255,.08)"}} onClick={google} disabled={loading}>Continue with Google</button>
-    {msg&&<p className="cf-muted" style={{marginTop:14,overflowWrap:"anywhere"}}>{msg}</p>}
-  </div>
+  const[mode,setMode]=useState<"login"|"signup">("login");const[email,setEmail]=useState("");const[password,setPassword]=useState("");const[phone,setPhone]=useState("");const[msg,setMsg]=useState("");const[loading,setLoading]=useState(false);const router=useRouter();const searchParams=useSearchParams();const requestedNext=searchParams.get("next")||"/dashboard";const next=requestedNext.startsWith("/")&&!requestedNext.startsWith("//")?requestedNext:"/dashboard";
+  async function submit(e:React.FormEvent){e.preventDefault();if(loading)return;setLoading(true);setMsg("");const normalizedEmail=email.trim().toLowerCase();try{const supabase=createClient();const result=mode==="login"?await supabase.auth.signInWithPassword({email:normalizedEmail,password}):await supabase.auth.signUp({email:normalizedEmail,password,options:{data:{phone:phone.trim()},emailRedirectTo:`${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`}});if(result.error){setMsg(result.error.message);return}if(mode==="signup"&&!result.data.session){setMsg("Account created. Check your email to confirm your account, then log in.");return}router.replace(next as Parameters<typeof router.replace>[0]);router.refresh()}catch(error){setMsg(`Authentication failed: ${error instanceof Error?error.message:"Unknown authentication error"}`)}finally{setLoading(false)}}
+  async function google(){setMsg("");try{const supabase=createClient();const{error}=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:`${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`}});if(error)setMsg(error.message)}catch(error){setMsg(`Authentication failed: ${error instanceof Error?error.message:"Unknown authentication error"}`)}}
+  return <div className="cf-card" style={{padding:26}}><div style={{display:"flex",gap:8,marginBottom:20}}><button type="button" className="cf-btn" style={{flex:1,opacity:mode==="login"?1:.45}} onClick={()=>{setMode("login");setMsg("")}}>Login</button><button type="button" className="cf-btn" style={{flex:1,opacity:mode==="signup"?1:.45}} onClick={()=>{setMode("signup");setMsg("")}}>Sign up</button></div><form onSubmit={submit} style={{display:"grid",gap:12}}><input className="cf-input" placeholder="Email" type="email" value={email} onChange={e=>setEmail(e.target.value)} required autoComplete="email"/><input className="cf-input" placeholder="Password" type="password" value={password} onChange={e=>setPassword(e.target.value)} required minLength={6} autoComplete={mode==="login"?"current-password":"new-password"}/>{mode==="signup"&&<input className="cf-input" placeholder="Phone number (optional)" value={phone} onChange={e=>setPhone(e.target.value)} autoComplete="tel"/>}<button className="cf-btn" disabled={loading}>{loading?"Please wait...":mode==="login"?"Login":"Create account"}</button></form>{mode==="login"&&<div style={{textAlign:"right",marginTop:10}}><Link href="/forgot-password" className="cf-muted">Forgot password?</Link></div>}<div style={{textAlign:"center",margin:"18px 0"}} className="cf-muted">or</div><button type="button" className="cf-btn" style={{width:"100%",background:"rgba(255,255,255,.08)"}} onClick={google} disabled={loading}>Continue with Google</button>{msg&&<p className="cf-muted" style={{marginTop:14,overflowWrap:"anywhere"}}>{msg}</p>}</div>
 }
