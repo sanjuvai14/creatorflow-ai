@@ -34,12 +34,16 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
 
-    const { data: credits, error: creditError } = await supabase.rpc("consume_credit", { p_user_id: user.id });
+    // Verify the user with the session client first, then reserve the credit through
+    // the privileged client. The database function explicitly permits service_role.
+    const admin = createAdminClient();
+    const { data: credits, error: creditError } = await admin.rpc("consume_credit", { p_user_id: user.id });
     if (creditError) {
       const message = creditError.message?.toLowerCase() || "";
+      console.error("CreatorFlow image credit reservation failed", { userId: user.id, message });
       if (message.includes("no credits")) return NextResponse.json({ error: "No credits left. Please upgrade or wait for your next credit reset." }, { status: 402 });
       if (message.includes("not authorized")) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
-      return NextResponse.json({ error: "Could not reserve a credit." }, { status: 500 });
+      return NextResponse.json({ error: "Could not reserve a credit. Please try again." }, { status: 500 });
     }
 
     try {
@@ -67,13 +71,7 @@ export async function POST(req: Request) {
         "Make the composition professional, visually clear, high contrast where appropriate, and suitable for social media publishing."
       ].join("\n");
 
-      const result = await client.images.generate({
-        model,
-        prompt: fullPrompt,
-        size,
-        n: 1
-      });
-
+      const result = await client.images.generate({ model, prompt: fullPrompt, size, n: 1 });
       const image = result.data?.[0];
       const imageUrl = image?.url || (image?.b64_json ? `data:image/png;base64,${image.b64_json}` : null);
 
@@ -85,11 +83,7 @@ export async function POST(req: Request) {
         }, { status: 502 });
       }
 
-      return NextResponse.json({
-        imageUrl,
-        revisedPrompt: image?.revised_prompt || fullPrompt,
-        credits
-      });
+      return NextResponse.json({ imageUrl, revisedPrompt: image?.revised_prompt || fullPrompt, credits });
     } catch (error) {
       console.error("CreatorFlow image generation failed", {
         model: process.env.OPENAI_IMAGE_MODEL || "gpt-image-1",
