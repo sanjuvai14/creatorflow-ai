@@ -12,37 +12,21 @@ const starterIdeas=["5 AI tools that can save creators time","A 30-second motiva
 const growthTool=(id:string)=>{const s=id.toLowerCase();return s.includes("watch")||s.includes("subscriber")||s.includes("follower")||s.includes("retention")||s.includes("completion")||s.includes("analyzer")};
 const calendarTool=(id:string)=>id.toLowerCase().includes("calendar");
 function inferWorkflow(text:string,currentTool:string,currentPlatform:string){
- const s=text.toLowerCase();
- let platform=currentPlatform;
- let tool=currentTool;
- if(/youtube|yt\b/.test(s)) platform="youtube";
- else if(/instagram|\big\b|reel/.test(s)) platform="instagram";
- else if(/tiktok|tik tok/.test(s)) platform="tiktok";
- else if(/facebook|fb\b/.test(s)) platform="facebook";
- else if(/linkedin/.test(s)) platform="linkedin";
- else if(/shopify|product|ecommerce|e-commerce|store/.test(s)) platform="shopify";
- if(/thumbnail|banner|cover|visual|image|graphic/.test(s)) tool="visual";
- else if(/watch.?time|retention|completion|subscriber|follower|analytics|analy[sz]e|growth|views/.test(s)) tool="growth";
- else if(/calendar|schedule|content plan/.test(s)) tool="calendar";
- else if(/shorts|reel|tiktok video|30.?second|60.?second/.test(s)) tool="shorts";
- else if(/product description|product copy|seo product|store copy/.test(s)) tool="product";
- else if(/facebook post|instagram post|social post|caption|carousel|linkedin post|thread/.test(s)) tool="social";
- else if(/youtube|title|description|tags|long.?form|script/.test(s)) tool="youtube";
+ const s=text.toLowerCase(); let platform=currentPlatform; let tool=currentTool;
+ if(/youtube|yt\b/.test(s)) platform="youtube"; else if(/instagram|\big\b|reel/.test(s)) platform="instagram"; else if(/tiktok|tik tok/.test(s)) platform="tiktok"; else if(/facebook|fb\b/.test(s)) platform="facebook"; else if(/linkedin/.test(s)) platform="linkedin"; else if(/shopify|product|ecommerce|e-commerce|store/.test(s)) platform="shopify";
+ if(/thumbnail|banner|cover|visual|image|graphic/.test(s)) tool="visual"; else if(/watch.?time|retention|completion|subscriber|follower|analytics|analy[sz]e|growth|views/.test(s)) tool="growth"; else if(/calendar|schedule|content plan/.test(s)) tool="calendar"; else if(/shorts|reel|tiktok video|30.?second|60.?second/.test(s)) tool="shorts"; else if(/product description|product copy|seo product|store copy/.test(s)) tool="product"; else if(/facebook post|instagram post|social post|caption|carousel|linkedin post|thread/.test(s)) tool="social"; else if(/youtube|title|description|tags|long.?form|script/.test(s)) tool="youtube";
  return {tool,platform};
 }
-
 type Message={role:"user"|"assistant";text:string};
 export default function Dashboard(){
  const[tool,setTool]=useState(tools[0].id),[platform,setPlatform]=useState(""),[language,setLanguage]=useState("English"),[topic,setTopic]=useState(""),[tone,setTone]=useState("Engaging"),[result,setResult]=useState(""),[loading,setLoading]=useState(false),[action,setAction]=useState(""),[credits,setCredits]=useState<number|null>(null),[error,setError]=useState(""),[messages,setMessages]=useState<Message[]>([]);
- const router=useRouter();
- const activeTool=useMemo(()=>tools.find(t=>t.id===tool)??{id:tool,icon:"✦",name:tool||"CreatorFlow Tool",desc:`AI workflow for ${platform||"your platform"}`},[tool,platform]);
+ const router=useRouter(); const activeTool=useMemo(()=>tools.find(t=>t.id===tool)??{id:tool,icon:"✦",name:tool||"CreatorFlow Tool",desc:`AI workflow for ${platform||"your platform"}`},[tool,platform]);
  useEffect(()=>{loadCredits();const p=new URLSearchParams(window.location.search);const requestedTool=p.get("tool")||"";const requestedPlatform=p.get("platform")||"";if(requestedTool){setTool(requestedTool);setPlatform(requestedPlatform);setTopic(`${requestedTool} for ${requestedPlatform||"my content"}`)}},[]);
  async function loadCredits(){try{const r=await fetch("/api/profile",{cache:"no-store"});const d=await r.json();if(typeof d.credits==="number")setCredits(d.credits)}catch{}}
  async function generate(){const clean=topic.trim();if(!clean||loading)return;const inferred=inferWorkflow(clean,tool,platform);setTool(inferred.tool);setPlatform(inferred.platform);setLoading(true);setResult("");setAction("");setError("");setMessages(prev=>[...prev,{role:"user",text:clean},{role:"assistant",text:"Thinking…"}]);try{const r=await fetch("/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({tool:inferred.tool,platform:inferred.platform,language,topic:clean,tone})});const data=await r.json();setMessages(prev=>{const copy=[...prev];copy[copy.length-1]={role:"assistant",text:r.ok?(data.output||"No content was returned. Please try again."):(data.error||"We couldn't generate this yet. Please try again.")};return copy});if(!r.ok){setError(data.error||"We couldn't generate this yet. Please try again.");if(typeof data.credits==="number")setCredits(data.credits);return}setResult(data.output||"");if(typeof data.credits==="number")setCredits(data.credits)}catch{const msg="Connection problem. Please try again in a moment";setError(msg);setMessages(prev=>{const copy=[...prev];copy[copy.length-1]={role:"assistant",text:msg};return copy})}finally{setLoading(false)}}
  async function copyResult(){if(!result)return;try{await navigator.clipboard?.writeText(result);setAction("Copied ✓");setTimeout(()=>setAction(""),1600)}catch{setAction("Copy failed")}}
  async function saveResult(){if(!result)return;setAction("Saving...");try{const r=await fetch("/api/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:topic.slice(0,60),type:tool,content:result})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Save failed");setAction("Saved ✓");setTimeout(()=>setAction(""),1600)}catch(e){setAction(e instanceof Error?e.message:"Save failed");setTimeout(()=>setAction(""),2200)}}
- function chooseTool(id:string){setTool(id);setPlatform("");setResult("");setError("");setAction("");setMessages([])}
- function useIdea(idea:string){setTopic(idea);setError("")}
+ function chooseTool(id:string){setTool(id);setPlatform("");setResult("");setError("");setAction("");setMessages([])} function useIdea(idea:string){setTopic(idea);setError("")}
  const go=(path:"/"|"/history"|"/settings"|"/saved")=>router.push(path); const goVisuals=()=>window.location.assign("/images"); const goPlatforms=()=>window.location.assign("/platforms");
  return <main className="cf-dashboard" style={{maxWidth:1380,margin:"0 auto",padding:"18px 20px 40px"}}><header className="cf-topbar"><button className="cf-brand" onClick={()=>go("/")}><span>Creator</span><strong>Flow</strong><em>AI</em></button><div className="cf-top-actions"><div className="cf-credit"><span>Credits</span><b>{credits??"—"}</b></div><button className="cf-icon-btn" onClick={goPlatforms}>Platform Hub</button><button className="cf-icon-btn" onClick={()=>go("/history")}>History</button><button className="cf-icon-btn" onClick={()=>go("/saved")}>Saved</button><button className="cf-icon-btn" onClick={goVisuals}>Visuals</button><button className="cf-icon-btn" onClick={()=>go("/settings")}>Settings</button></div></header>
  <section className="cf-welcome cf-glow"><div><div className="cf-eyebrow">CREATOR WORKSPACE</div><h1>Your AI creator workspace.</h1><p>Tell CreatorFlow what you want. Pick a tool only when you need more control.</p>{platform&&<div style={{marginTop:14,fontSize:13,opacity:.9}}>Selected workflow: <b>{platform}</b> / <b>{tool}</b></div>}</div><div className="cf-stat"><span>Available credits</span><strong>{credits??"—"}</strong><small>1 credit per successful AI generation</small></div></section>
