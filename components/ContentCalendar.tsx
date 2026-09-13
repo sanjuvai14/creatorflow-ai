@@ -6,9 +6,10 @@ const platforms=["YouTube","Instagram","TikTok","Facebook","LinkedIn","X","Threa
 const types=["Long video","Short video","Post","Carousel","Thread","Newsletter","Article"];
 const hooks=["Stop scrolling—try this simple approach.","3 mistakes creators should avoid.","Here is the practical step-by-step.","If I started today, I would do this first."];
 const ctas=["Save this for later.","Comment with your biggest challenge.","Follow for the next practical tip.","Share with a creator who needs this."];
+const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const dateFor=(start:string,i:number)=>{const d=new Date(`${start}T12:00:00`);d.setDate(d.getDate()+i);return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});};
 export default function ContentCalendar(){
- const [days,setDays]=useState("7"),[topic,setTopic]=useState("AI creator tips"),[goal,setGoal]=useState("Grow audience"),[start,setStart]=useState(()=>new Date().toISOString().slice(0,10));
+ const [days,setDays]=useState("7"),[topic,setTopic]=useState("AI creator tips"),[goal,setGoal]=useState("Grow audience"),[start,setStart]=useState(localDate);
  const [copied,setCopied]=useState(false);
  const rows=useMemo<Row[]>(()=>{const n=Math.min(30,Math.max(1,Number(days)||7));return Array.from({length:n},(_,i)=>{const p=platforms[i%platforms.length];const type=types[i%types.length];return {day:i+1,date:dateFor(start,i),platform:p,type,topic:`${topic.trim()||"Content idea"} — ${goal}`,hook:hooks[i%hooks.length],cta:ctas[i%ctas.length]}})},[days,topic,goal,start]);
  const copy=async()=>{const text=rows.map(r=>`${r.date} | ${r.platform} | ${r.type}\n${r.topic}\nHook: ${r.hook}\nCTA: ${r.cta}`).join("\n\n");try{await navigator.clipboard.writeText(text);setCopied(true);setTimeout(()=>setCopied(false),1800)}catch{setCopied(false)}};
