@@ -6,7 +6,15 @@ const FALLBACK_SUPABASE_KEY = "sb_publishable_a5EYf9js-rdRpjeLlJVvzg_AEKHMVr8";
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const protectedPath = pathname.startsWith("/dashboard") || pathname.startsWith("/history") || pathname.startsWith("/images") || pathname.startsWith("/settings") || pathname.startsWith("/platforms") || (pathname.startsWith("/api/") && pathname !== "/api/health");
+  const isPublicWebhook = pathname === "/api/billing/webhook";
+  const protectedPath = !isPublicWebhook && (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/history") ||
+    pathname.startsWith("/images") ||
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/platforms") ||
+    (pathname.startsWith("/api/") && pathname !== "/api/health")
+  );
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_SUPABASE_KEY;
