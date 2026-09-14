@@ -47,6 +47,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Webhook is not configured." }, { status: 503 });
   }
 
+  // Billing is intentionally not active yet. If a webhook secret exists but the
+  // server-side Supabase credential is not configured, fail cleanly instead of
+  // throwing an unhandled runtime error. No entitlement is granted in this state.
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: "Billing webhook backend is not configured." }, { status: 503 });
+  }
+
   const signature = request.headers.get("paddle-signature");
   if (!signature) {
     return NextResponse.json({ error: "Missing Paddle signature." }, { status: 400 });
