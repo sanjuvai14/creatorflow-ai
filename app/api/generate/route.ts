@@ -24,7 +24,13 @@ async function generateWithProvider(provider: ConcreteProvider, model: string | 
  throw new Error("provider_not_implemented");
 }
 
-function providerOrder(requested: AIProviderId): ConcreteProvider[] { const all=["openai","gemini","anthropic","grok"] as const; if(requested!=="auto") return [requested]; const preferred=resolveProvider("auto"); return [preferred,...all.filter(id=>id!==preferred)].filter((id,index,arr)=>Boolean(id)&&arr.indexOf(id)===index&&providerIsConfigured(id)) as ConcreteProvider[]; }
+function providerOrder(requested: AIProviderId): ConcreteProvider[] {
+ const all: ConcreteProvider[]=["openai","gemini","anthropic","grok"];
+ if(requested!=="auto") return providerIsConfigured(requested) ? [requested] : [];
+ const preferred=resolveProvider("auto");
+ const candidates: ConcreteProvider[] = preferred ? [preferred as ConcreteProvider, ...all] : all;
+ return candidates.filter((id,index,arr)=>providerIsConfigured(id)&&arr.indexOf(id)===index);
+}
 
 export async function POST(req:Request){
  try{
@@ -32,14 +38,15 @@ export async function POST(req:Request){
   const raw=await req.text(); if(new TextEncoder().encode(raw).byteLength>MAX_PAYLOAD_BYTES)return NextResponse.json({error:"Request is too large."},{status:413});
   let body:unknown; try{body=JSON.parse(raw);}catch{return NextResponse.json({error:"Invalid request body."},{status:400});}
   const input=body as Record<string,unknown>; const tool=safeString(input?.tool); const platform=safeString(input?.platform); const language=safeString(input?.language); const tone=safeString(input?.tone); const topic=typeof input?.topic==="string"?input.topic.trim():"";
-  const requestedProvider=(safeString(input?.provider,30)||"auto") as AIProviderId; const model=safeString(input?.model,100)||undefined;
+  const rawProvider=safeString(input?.provider,30)||"auto"; const validProviders=["auto","openai","gemini","anthropic","grok"] as const; if(!validProviders.includes(rawProvider as typeof validProviders[number]))return NextResponse.json({error:"Unsupported AI provider."},{status:400});
+  const requestedProvider=rawProvider as AIProviderId; const model=safeString(input?.model,100)||undefined;
   if(!topic)return NextResponse.json({error:"Topic is required."},{status:400}); if(topic.length>MAX_TOPIC_LENGTH)return NextResponse.json({error:"Topic is too long. Please keep it under 5,000 characters."},{status:400});
   const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser(); if(!user)return NextResponse.json({error:"Please log in first."},{status:401});
   const order=providerOrder(requestedProvider); if(!order.length)return NextResponse.json({error:requestedProvider==="auto"?"No AI provider is connected yet. Your credits were not used.":"That AI provider is not connected yet. Add its server-side API key before using it.",credits:null,code:"AI_PROVIDER_NOT_CONFIGURED"},{status:503});
   const admin=createAdminClient(); const {data:allowed,error:rateError}=await admin.rpc("check_generation_rate_limit",{p_user_id:user.id,p_limit:RATE_LIMIT,p_window_seconds:RATE_WINDOW_SECONDS}); if(rateError)return NextResponse.json({error:"Could not verify request limit. Please try again later."},{status:503}); if(!allowed)return NextResponse.json({error:"Generation limit reached. Please try again later."},{status:429,headers:{"Retry-After":String(RATE_WINDOW_SECONDS)}});
   const {data:credits,error:creditError}=await admin.rpc("consume_credit",{p_user_id:user.id}); if(creditError){const message=creditError.message?.toLowerCase()||""; if(message.includes("no credits"))return NextResponse.json({error:"No credits left. Please upgrade or wait for your next credit reset."},{status:402}); if(message.includes("not authorized"))return NextResponse.json({error:"Not authorized."},{status:403}); return NextResponse.json({error:"Could not reserve a credit."},{status:500});}
-  let output=""; let usedProvider:ConcreteProvider|""=""; let lastError:unknown=null;
-  for(const candidate of order){ try { output=await generateWithProvider(candidate,model,buildPrompt({tool,platform,language,tone,topic,provider:candidate,model})); if(output){usedProvider=candidate;break;} } catch(error){lastError=error;} }
+  let output=""; let usedProvider:ConcreteProvider|""="";
+  for(const candidate of order){ try { output=await generateWithProvider(candidate,model,buildPrompt({tool,platform,language,tone,topic,provider:candidate,model})); if(output){usedProvider=candidate;break;} } catch { /* Auto mode intentionally continues to the next configured provider. */ } }
   if(!output){ const refund=await refundCredit(user.id); return NextResponse.json({error:refund.ok?"AI generation failed. Your credit has been returned; please try again.":"AI generation failed. We could not automatically return the credit. Please contact support.",credits:refund.credits??credits,code:"AI_GENERATION_FAILED",attemptedProviders:order},{status:502}); }
   const {error:genError}=await supabase.from("generations").insert({user_id:user.id,tool_type:tool||"creator",language:language||"English",input_text:topic,output_text:output});
   if(genError){const refund=await refundCredit(user.id);return NextResponse.json({output,error:refund.ok?"Content generated, but history could not be saved. Your credit has been returned.":"Content generated, but history could not be saved and the credit could not be returned automatically.",credits:refund.credits??credits,warning:"Please try saving the content again later.",provider:usedProvider},{status:200});}
