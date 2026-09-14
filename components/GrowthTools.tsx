@@ -11,12 +11,40 @@ export default function GrowthTools({tool,platform=""}:Props){
  const days=useMemo(()=>num(g("growth"))?(num(g("targetSubs"))-num(g("currentSubs")))/num(g("growth")):0,[x]);
  const fdays=useMemo(()=>num(g("dailyFollowers"))?(num(g("targetFollowers"))-num(g("currentFollowers")))/num(g("dailyFollowers")):0,[x]);
  const ret=useMemo(()=>num(g("duration"))?Math.min(100,num(g("avgWatch"))/num(g("duration"))*100):0,[x]);
- const isFollower=tool.toLowerCase().includes("follower");
- const isSubscriber=tool.toLowerCase().includes("subscriber");
- const isRetention=tool.toLowerCase().includes("retention")||tool.toLowerCase().includes("completion")||tool.toLowerCase().includes("analyzer");
- if((tool.toLowerCase().includes("watch")&&!isRetention)||tool.toLowerCase().includes("watch-time")) return <section className="cf-card" style={{padding:18}}><div className="cf-eyebrow">ANALYTICS PLANNER</div><h2>{platform||"YouTube"} Watch-Time Planner</h2><p className="cf-muted">Estimate watch hours from your own assumptions. No live metrics are fabricated.</p><div className="cf-form-grid"><Field label="Video duration" id="duration" suffix="min"/><Field label="Average retention" id="retention" suffix="%"/><Field label="Expected views" id="views"/><Field label="Target watch hours" id="targetHours" suffix="hours"/></div><div style={{marginTop:18,fontSize:18,fontWeight:700}}>{watch.toFixed(1)} estimated watch hours</div><small className="cf-muted">{num(g("targetHours"))?(watch/num(g("targetHours"))*100).toFixed(1):0}% of target</small></section>;
+ const key=tool.toLowerCase();
+ const isFollower=key.includes("follower");
+ const isSubscriber=key.includes("subscriber");
+ const isRetention=key.includes("retention")||key.includes("completion")||key.includes("analyzer");
+ const isWatch=key.includes("watch")||key.includes("watch-time");
+
+ if(isWatch&&!isRetention) return <section className="cf-card" style={{padding:18}}><div className="cf-eyebrow">ANALYTICS PLANNER</div><h2>{platform||"YouTube"} Watch-Time Planner</h2><p className="cf-muted">Estimate watch hours from your own assumptions. No live metrics are fabricated.</p><div className="cf-form-grid"><Field label="Video duration" id="duration" suffix="min"/><Field label="Average retention" id="retention" suffix="%"/><Field label="Expected views" id="views"/><Field label="Target watch hours" id="targetHours" suffix="hours"/></div><div style={{marginTop:18,fontSize:18,fontWeight:700}}>{watch.toFixed(1)} estimated watch hours</div><small className="cf-muted">{num(g("targetHours"))?(watch/num(g("targetHours"))*100).toFixed(1):0}% of target</small></section>;
  if(isSubscriber) return <section className="cf-card" style={{padding:18}}><div className="cf-eyebrow">GROWTH PLANNER</div><h2>YouTube Subscriber Growth Planner</h2><p className="cf-muted">Transparent scenario planning based on your daily growth assumption.</p><div className="cf-form-grid"><Field label="Current subscribers" id="currentSubs"/><Field label="Target subscribers" id="targetSubs"/><Field label="Expected new subscribers / day" id="growth"/></div><div style={{marginTop:18,fontSize:18,fontWeight:700}}>{days>0?`${Math.ceil(days)} days estimated`:"Enter a positive daily growth assumption"}</div></section>;
  if(isFollower) return <section className="cf-card" style={{padding:18}}><div className="cf-eyebrow">GROWTH CALCULATOR</div><h2>Follower Growth Calculator</h2><div className="cf-form-grid"><Field label="Current followers" id="currentFollowers"/><Field label="Target followers" id="targetFollowers"/><Field label="Expected growth / day" id="dailyFollowers"/></div><div style={{marginTop:18,fontSize:18,fontWeight:700}}>{fdays>0?`${Math.ceil(fdays)} days estimated`:"Enter a positive daily growth assumption"}</div></section>;
  if(isRetention) return <section className="cf-card" style={{padding:18}}><div className="cf-eyebrow">RETENTION ANALYZER</div><h2>{platform||"Video"} Retention & Completion Planner</h2><p className="cf-muted">Use your video length and average watch duration to understand retention.</p><div className="cf-form-grid"><Field label="Video duration" id="duration" suffix="sec"/><Field label="Average watch duration" id="avgWatch" suffix="sec"/></div><div style={{marginTop:18,fontSize:18,fontWeight:700}}>{ret.toFixed(1)}% estimated average retention</div><p className="cf-muted">{ret>=70?"Strong signal—protect the opening and pacing.":ret>=40?"Moderate signal—test a stronger hook and tighter pacing.":"Review the opening, pacing and payoff."}</p></section>;
- return null;
+
+ return <section className="cf-card" style={{padding:18}}>
+   <div className="cf-eyebrow">REAL GROWTH ENGINE</div>
+   <h2>Growth & Analytics Workspace</h2>
+   <p className="cf-muted">Use transparent planning tools to turn your current numbers into practical next steps. CreatorFlow never invents live platform metrics.</p>
+   <div className="cf-form-grid" style={{marginTop:18}}>
+     <Field label="YouTube expected views" id="views"/>
+     <Field label="Video duration" id="duration" suffix="min"/>
+     <Field label="Average retention" id="retention" suffix="%"/>
+     <Field label="Current subscribers" id="currentSubs"/>
+     <Field label="Target subscribers" id="targetSubs"/>
+     <Field label="Expected subscribers / day" id="growth"/>
+   </div>
+   <div style={{display:"grid",gap:10,marginTop:18}}>
+     <div><b>{watch.toFixed(1)} hours</b> estimated watch time for the scenario</div>
+     <div><b>{days>0?Math.ceil(days):"—"}</b> days to the subscriber target at the stated daily assumption</div>
+   </div>
+   <div style={{marginTop:20,padding:14,borderRadius:12,border:"1px solid rgba(255,255,255,.08)",background:"rgba(255,255,255,.03)"}}>
+     <b>Next best actions</b>
+     <ul style={{margin:"10px 0 0 18px",lineHeight:1.7}}>
+       <li>Strengthen the first 3–10 seconds of every short-form or video asset.</li>
+       <li>Compare retention and click-through changes after each content experiment.</li>
+       <li>Reuse winning topics across platforms without copying platform-specific formatting.</li>
+     </ul>
+   </div>
+ </section>;
 }
