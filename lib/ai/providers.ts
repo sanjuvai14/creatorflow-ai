@@ -8,6 +8,7 @@ export type ProviderConfig = {
   model: string;
 };
 
+/** Universal provider registry. Credentials remain server-side. */
 export function getProviderConfigs(): ProviderConfig[] {
   return [
     { name: "openai", label: "OpenAI", configured: Boolean(process.env.OPENAI_API_KEY), model: process.env.OPENAI_TEXT_MODEL || "gpt-5-mini" },
