@@ -1,0 +1,108 @@
+{
+  "brand": "CreatorFlow AI",
+  "strategy": "platform_agnostic_creator_ai",
+  "lastReviewed": "2026-09-14",
+  "principles": [
+    "Add standards and public/free capabilities when practical.",
+    "Keep paid providers disabled until credentials, pricing, limits, and user approval are available.",
+    "Never fake an integration as active; show Pending/Ready status instead.",
+    "Use server-side secrets only and protect platform OAuth scopes."
+  ],
+  "activeFreeOrFoundation": [
+    {
+      "id": "ai-model-router",
+      "name": "Multi-model AI Router",
+      "status": "foundation",
+      "description": "Provider-neutral routing layer so CreatorFlow can add Gemini, OpenAI and future models without redesigning the app."
+    },
+    {
+      "id": "creator-workspace",
+      "name": "Universal Creator Workspace",
+      "status": "active",
+      "description": "One workflow for idea, research, script, post, thumbnail, SEO, publishing checklist and analytics."
+    },
+    {
+      "id": "video-to-assets",
+      "name": "Video-to-Assets",
+      "status": "ready-for-integration",
+      "description": "Use video context to create thumbnail concepts, titles, descriptions, chapters, clips and social repurposing plans."
+    },
+    {
+      "id": "global-localization",
+      "name": "Global Localization",
+      "status": "active",
+      "description": "Translation, localization and dubbing-ready workflow for multilingual creators."
+    },
+    {
+      "id": "growth-intelligence",
+      "name": "Growth Intelligence",
+      "status": "active",
+      "description": "Content ideas, hooks, SEO, posting plans, audience insights and experiment tracking."
+    },
+    {
+      "id": "brand-memory",
+      "name": "Brand Memory",
+      "status": "planned-free-layer",
+      "description": "Reusable brand voice, audience, offers, visual direction and platform preferences."
+    }
+  ],
+  "pendingPaidOrCredentialGated": [
+    {
+      "id": "google-video-generation",
+      "name": "Google Veo video generation",
+      "status": "pending",
+      "gate": "provider billing/API access",
+      "description": "Video generation/editing integration slot; activate only after approved credentials and cost controls."
+    },
+    {
+      "id": "google-music-generation",
+      "name": "Google Lyria music generation",
+      "status": "pending",
+      "gate": "API availability/billing",
+      "description": "Music generation integration slot; no automatic spending."
+    },
+    {
+      "id": "premium-image-generation",
+      "name": "Premium image generation",
+      "status": "pending",
+      "gate": "provider billing/API access",
+      "description": "Higher-end image generation/editing providers can plug into the image router later."
+    },
+    {
+      "id": "platform-publishing-oauth",
+      "name": "Direct social publishing",
+      "status": "pending",
+      "gate": "platform OAuth apps, permissions and review",
+      "description": "Direct publish/schedule actions for supported social platforms after credentials and approvals are supplied."
+    },
+    {
+      "id": "commerce-connectors",
+      "name": "Advanced commerce connectors",
+      "status": "pending",
+      "gate": "store/platform credentials",
+      "description": "Deeper Shopify and future commerce automation behind explicit connection and permissions."
+    },
+    {
+      "id": "premium-analytics",
+      "name": "Advanced analytics connectors",
+      "status": "pending",
+      "gate": "platform APIs/quotas",
+      "description": "Deeper cross-platform metrics after API access is configured."
+    }
+  ],
+  "watchlist": [
+    "Gemini model releases and API changes",
+    "Google AI Studio capabilities",
+    "YouTube creator AI and auto-dubbing updates",
+    "video-to-image and multimodal creator workflows",
+    "agentic computer-use capabilities",
+    "new social platform creator APIs",
+    "AI music generation and editing",
+    "AI video generation and conversational editing"
+  ],
+  "activationPolicy": {
+    "free": "Can be enabled when technically available without paid credentials and after build verification.",
+    "pending": "UI/config slot exists but execution remains disabled until required credentials, permissions and explicit approval are present.",
+    "never": "Do not expose fake success states or silently create billable usage."
+  }
+}
