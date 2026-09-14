@@ -1,31 +1,29 @@
-export type AIProviderId = "auto" | "openai" | "gemini" | "anthropic" | "grok";
+export type AIProviderName = "openai" | "gemini" | "anthropic" | "grok";
 
-export type AIProvider = {
-  id: Exclude<AIProviderId, "auto">;
-  name: string;
-  description: string;
-  envKey: string;
-  defaultModel: string;
+export type ProviderConfig = {
+  name: AIProviderName;
+  label: string;
+  configured: boolean;
+  model: string;
 };
 
-export const AI_PROVIDERS: AIProvider[] = [
-  { id: "openai", name: "OpenAI", description: "Chat, reasoning and creator workflows", envKey: "OPENAI_API_KEY", defaultModel: process.env.OPENAI_TEXT_MODEL || "gpt-5-mini" },
-  { id: "gemini", name: "Google Gemini", description: "Multimodal and fast creator workflows", envKey: "GEMINI_API_KEY", defaultModel: process.env.GEMINI_TEXT_MODEL || "gemini-3.6-flash" },
-  { id: "anthropic", name: "Claude", description: "Long-form writing and analysis", envKey: "ANTHROPIC_API_KEY", defaultModel: process.env.ANTHROPIC_TEXT_MODEL || "claude-sonnet-4-6" },
-  { id: "grok", name: "Grok", description: "Additional AI provider connector", envKey: "XAI_API_KEY", defaultModel: process.env.XAI_TEXT_MODEL || "grok-4.20-0309-non-reasoning" },
-];
-
-export function providerIsConfigured(id: Exclude<AIProviderId, "auto">) {
-  const provider = AI_PROVIDERS.find((item) => item.id === id);
-  return Boolean(provider && process.env[provider.envKey]);
+export function getProviderConfigs(): ProviderConfig[] {
+  return [
+    { name: "openai", label: "OpenAI", configured: Boolean(process.env.OPENAI_API_KEY), model: process.env.OPENAI_TEXT_MODEL || "gpt-5-mini" },
+    { name: "gemini", label: "Google Gemini", configured: Boolean(process.env.GEMINI_API_KEY), model: process.env.GEMINI_TEXT_MODEL || "gemini-flash-latest" },
+    { name: "anthropic", label: "Anthropic Claude", configured: Boolean(process.env.ANTHROPIC_API_KEY), model: process.env.ANTHROPIC_TEXT_MODEL || "claude-sonnet-4-5" },
+    { name: "grok", label: "xAI Grok", configured: Boolean(process.env.XAI_API_KEY), model: process.env.XAI_TEXT_MODEL || "grok-4.6" },
+  ];
 }
 
-export function getConfiguredProviders() {
-  return AI_PROVIDERS.filter((provider) => Boolean(process.env[provider.envKey]));
+export function getProviderOrder(preferred?: string): AIProviderName[] {
+  const configured = getProviderConfigs().filter((provider) => provider.configured).map((provider) => provider.name);
+  if (preferred && preferred !== "auto" && configured.includes(preferred as AIProviderName)) {
+    return [preferred as AIProviderName, ...configured.filter((name) => name !== preferred)];
+  }
+  return configured;
 }
 
-export function resolveProvider(requested: AIProviderId): Exclude<AIProviderId, "auto"> | null {
-  if (requested !== "auto") return providerIsConfigured(requested) ? requested : null;
-  const preferred = ["openai", "gemini", "anthropic", "grok"] as const;
-  return preferred.find((id) => providerIsConfigured(id)) || null;
+export function getProviderStatus() {
+  return getProviderConfigs().map(({ name, label, configured, model }) => ({ name, label, configured, model: configured ? model : null }));
 }
