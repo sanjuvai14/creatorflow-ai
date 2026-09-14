@@ -11,8 +11,8 @@ export type AIProvider = {
 export const AI_PROVIDERS: AIProvider[] = [
   { id: "openai", name: "OpenAI", description: "Chat, reasoning and creator workflows", envKey: "OPENAI_API_KEY", defaultModel: process.env.OPENAI_TEXT_MODEL || "gpt-5-mini" },
   { id: "gemini", name: "Google Gemini", description: "Multimodal and fast creator workflows", envKey: "GEMINI_API_KEY", defaultModel: process.env.GEMINI_TEXT_MODEL || "gemini-3.6-flash" },
-  { id: "anthropic", name: "Claude", description: "Long-form writing and analysis", envKey: "ANTHROPIC_API_KEY", defaultModel: process.env.ANTHROPIC_TEXT_MODEL || "claude-sonnet-4-5" },
-  { id: "grok", name: "Grok", description: "Additional AI provider connector", envKey: "XAI_API_KEY", defaultModel: process.env.XAI_TEXT_MODEL || "grok-4-1-fast" },
+  { id: "anthropic", name: "Claude", description: "Long-form writing and analysis", envKey: "ANTHROPIC_API_KEY", defaultModel: process.env.ANTHROPIC_TEXT_MODEL || "claude-sonnet-4-6" },
+  { id: "grok", name: "Grok", description: "Additional AI provider connector", envKey: "XAI_API_KEY", defaultModel: process.env.XAI_TEXT_MODEL || "grok-4.20-0309-non-reasoning" },
 ];
 
 export function providerIsConfigured(id: Exclude<AIProviderId, "auto">) {
