@@ -8,6 +8,7 @@ const MAX_TOPIC_LENGTH = 5000;
 const MAX_PAYLOAD_BYTES = 12000;
 const RATE_LIMIT = 10;
 const RATE_WINDOW_SECONDS = 3600;
+const PROVIDER_TIMEOUT_MS = 45000;
 type ConcreteProvider = Exclude<AIProviderId, "auto">;
 type GenerateInput = { tool: string; platform: string; language: string; tone: string; topic: string; provider: AIProviderId; model?: string };
 
@@ -18,6 +19,7 @@ function configuredModel(provider: ConcreteProvider, requested?: string) { const
 function providerErrorMessage(error: unknown, provider: ConcreteProvider) {
  const status = typeof error === "object" && error && "status" in error ? Number((error as {status?:unknown}).status) : 0;
  const message = error instanceof Error ? error.message.toLowerCase() : "";
+ if(message.includes("aborted") || message.includes("timeout")) return `${provider} provider timed out. Please try again.`;
  if(provider === "openai") {
   if(status === 401 || message.includes("incorrect api key") || message.includes("invalid api key")) return "OpenAI API key was rejected. Check the Production OPENAI_API_KEY in Vercel.";
   if(status === 429 || message.includes("quota") || message.includes("billing") || message.includes("insufficient_quota")) return "OpenAI request was rate-limited or the API account has no available quota. Check the OpenAI API billing/usage settings.";
@@ -26,13 +28,14 @@ function providerErrorMessage(error: unknown, provider: ConcreteProvider) {
  }
  return `${provider} provider request failed. Please check its server-side configuration.`;
 }
+async function withTimeout<T>(task:(signal:AbortSignal)=>Promise<T>,timeoutMs=PROVIDER_TIMEOUT_MS){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeoutMs);try{return await task(controller.signal);}finally{clearTimeout(timer);}}
 async function extractText(response: Response) { const data=await response.json().catch(()=>null); if(!response.ok) { const detail=typeof data?.error?.message==="string"?data.error.message:typeof data?.error==="string"?data.error:"provider_request_failed"; const error=new Error(detail); Object.assign(error,{status:response.status}); throw error; } return data; }
 async function generateWithProvider(provider: ConcreteProvider, model: string | undefined, prompt: string) {
  const selected=()=>configuredModel(provider,model);
- if(provider === "openai") { if(!process.env.OPENAI_API_KEY) throw new Error("provider_not_configured"); const client=new OpenAI({apiKey:process.env.OPENAI_API_KEY}); const response=await client.responses.create({model:selected()||"gpt-5-mini",input:prompt}); return response.output_text?.trim()||""; }
- if(provider === "gemini") { if(!process.env.GEMINI_API_KEY) throw new Error("provider_not_configured"); const response=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(selected()||"gemini-flash-latest")}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":process.env.GEMINI_API_KEY},body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}]})}); const data=await extractText(response); return data?.candidates?.[0]?.content?.parts?.map((part:{text?:string})=>part.text||"").join("").trim()||""; }
- if(provider === "anthropic") { if(!process.env.ANTHROPIC_API_KEY) throw new Error("provider_not_configured"); const response=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":process.env.ANTHROPIC_API_KEY,"anthropic-version":"2023-06-01"},body:JSON.stringify({model:selected()||"claude-sonnet-4-5",max_tokens:4096,messages:[{role:"user",content:prompt}]})}); const data=await extractText(response); return data?.content?.filter((part:{type?:string})=>part.type==="text").map((part:{text?:string})=>part.text||"").join("").trim()||""; }
- if(provider === "grok") { if(!process.env.XAI_API_KEY) throw new Error("provider_not_configured"); const response=await fetch("https://api.x.ai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${process.env.XAI_API_KEY}`},body:JSON.stringify({model:selected()||"grok-4.6",messages:[{role:"user",content:prompt}]})}); const data=await extractText(response); return data?.choices?.[0]?.message?.content?.trim()||""; }
+ if(provider === "openai") { if(!process.env.OPENAI_API_KEY) throw new Error("provider_not_configured"); const client=new OpenAI({apiKey:process.env.OPENAI_API_KEY}); const response=await withTimeout((signal)=>client.responses.create({model:selected()||"gpt-5-mini",input:prompt,signal})); return response.output_text?.trim()||""; }
+ if(provider === "gemini") { if(!process.env.GEMINI_API_KEY) throw new Error("provider_not_configured"); const response=await withTimeout((signal)=>fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(selected()||"gemini-flash-latest")}:generateContent`,{method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":process.env.GEMINI_API_KEY},body:JSON.stringify({contents:[{role:"user",parts:[{text:prompt}]}]}),signal})); const data=await extractText(response); return data?.candidates?.[0]?.content?.parts?.map((part:{text?:string})=>part.text||"").join("").trim()||""; }
+ if(provider === "anthropic") { if(!process.env.ANTHROPIC_API_KEY) throw new Error("provider_not_configured"); const response=await withTimeout((signal)=>fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":process.env.ANTHROPIC_API_KEY,"anthropic-version":"2023-06-01"},body:JSON.stringify({model:selected()||"claude-sonnet-4-5",max_tokens:4096,messages:[{role:"user",content:prompt}]}),signal})); const data=await extractText(response); return data?.content?.filter((part:{type?:string})=>part.type==="text").map((part:{text?:string})=>part.text||"").join("").trim()||""; }
+ if(provider === "grok") { if(!process.env.XAI_API_KEY) throw new Error("provider_not_configured"); const response=await withTimeout((signal)=>fetch("https://api.x.ai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":`Bearer ${process.env.XAI_API_KEY}`},body:JSON.stringify({model:selected()||"grok-4.6",messages:[{role:"user",content:prompt}]}),signal})); const data=await extractText(response); return data?.choices?.[0]?.message?.content?.trim()||""; }
  throw new Error("provider_not_implemented");
 }
 function providerOrder(requested: AIProviderId): ConcreteProvider[] {
