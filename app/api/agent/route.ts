@@ -19,6 +19,13 @@ export async function POST(req: Request) {
     if (!message) return NextResponse.json({ error: "Message is required." }, { status: 400 });
     if (message.length > MAX_INPUT) return NextResponse.json({ error: "Message is too long." }, { status: 400 });
 
+    const provider = typeof input.provider === "string" ? input.provider.trim().slice(0, 40) : "Auto AI";
+    const language = typeof input.language === "string" ? input.language.trim().slice(0, 50) : "English";
+    const tone = typeof input.tone === "string" ? input.tone.trim().slice(0, 80) : "Professional";
+    const tool = typeof input.tool === "string" ? input.tool.trim().slice(0, 80) : "AI Agent";
+    const platform = typeof input.platform === "string" ? input.platform.trim().slice(0, 80) : "General";
+    const workflowContext = `CreatorFlow context: provider=${provider}; language=${language}; tone=${tone}; tool=${tool}; platform=${platform}. Follow these preferences unless the user's message explicitly overrides them.`;
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
@@ -33,7 +40,7 @@ export async function POST(req: Request) {
     if (rateError) return NextResponse.json({ error: "Could not verify request limit." }, { status: 503 });
     if (!allowed) return NextResponse.json({ error: "Agent request limit reached. Please try again later." }, { status: 429 });
 
-    const result = await runAgentForUser(message, user.id);
+    const result = await runAgentForUser(`${workflowContext}\n\nUser request:\n${message}`, user.id);
     return NextResponse.json({ success: true, ...result });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Agent execution failed.";
