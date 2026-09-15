@@ -171,7 +171,7 @@ export async function runCreatorAgent(input: string, ctx: AgentToolContext) {
   const maxTurns = 6;
 
   for (let turn = 0; turn < maxTurns; turn += 1) {
-    const calls = (response.output ?? []).filter((item: any) => item?.type === "function_call");
+    const calls = (response.output ?? []).filter((item: any) => item?.type === "function_call") as any[];
     if (!calls.length) return { output: response.output_text?.trim() || "I completed the request, but there was no text response.", model };
 
     const toolOutputs: any[] = [];
