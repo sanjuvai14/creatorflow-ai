@@ -7,7 +7,7 @@ const FALLBACK_SUPABASE_KEY = "sb_publishable_a5EYf9js-rdRpjeLlJVvzg_AEKHMVr8";
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isPublicWebhook = pathname === "/api/billing/webhook";
-  const isPublicAIStatus = pathname === "/api/ai-status";
+  const isPublicAIStatus = pathname === "/api/ai-status" || pathname === "/api/ai-status-public";
   const protectedPath = !isPublicWebhook && !isPublicAIStatus && (
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/history") ||
