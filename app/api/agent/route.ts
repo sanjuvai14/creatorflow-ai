@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { runAgentForUser } from "@/lib/agents/creator-agent";
 
-const MAX_INPUT = 12000;
+// Keep a generous UTF-8 byte guard while allowing long Bangla/Unicode messages.
+const MAX_INPUT_BYTES = 64 * 1024;
+const MAX_MESSAGE_CHARS = 24000;
 const RATE_LIMIT = 20;
 const RATE_WINDOW_SECONDS = 3600;
 const MAX_HISTORY_MESSAGES = 20;
@@ -12,15 +14,15 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-
 export async function POST(req: Request) {
   try {
     const raw = await req.text();
-    if (new TextEncoder().encode(raw).byteLength > MAX_INPUT) {
-      return NextResponse.json({ error: "Request is too large." }, { status: 413 });
+    if (new TextEncoder().encode(raw).byteLength > MAX_INPUT_BYTES) {
+      return NextResponse.json({ error: "Request is too large. Please shorten the message and try again." }, { status: 413 });
     }
     let body: unknown;
     try { body = JSON.parse(raw); } catch { return NextResponse.json({ error: "Invalid request body." }, { status: 400 }); }
     const input = body as Record<string, unknown>;
     const message = typeof input.message === "string" ? input.message.trim() : "";
     if (!message) return NextResponse.json({ error: "Message is required." }, { status: 400 });
-    if (message.length > MAX_INPUT) return NextResponse.json({ error: "Message is too long." }, { status: 400 });
+    if (message.length > MAX_MESSAGE_CHARS) return NextResponse.json({ error: "Message is too long. Please keep it under 24,000 characters." }, { status: 400 });
 
     const conversationId = typeof input.conversationId === "string" ? input.conversationId.trim() : "";
     if (conversationId && !UUID_RE.test(conversationId)) return NextResponse.json({ error: "Invalid conversation id." }, { status: 400 });
