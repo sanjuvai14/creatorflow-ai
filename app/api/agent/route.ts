@@ -54,8 +54,9 @@ export async function POST(req: Request) {
         .eq("user_id", user.id)
         .maybeSingle();
       if (lookupError) return NextResponse.json({ error: "Could not verify conversation." }, { status: 503 });
-      if (!owned) return NextResponse.json({ error: "Conversation not found." }, { status: 404 });
-    } else {
+      if (!owned) activeConversationId = "";
+    }
+    if (!activeConversationId) {
       const { data: created, error: createError } = await supabase
         .from("agent_conversations")
         .insert({ user_id: user.id, title: message.slice(0, 55) || "New conversation" })
