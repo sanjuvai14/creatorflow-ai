@@ -68,10 +68,9 @@ async function executeTool(name: string, args: Record<string, unknown>, ctx: Age
 
 export async function runCreatorAgent(input: string, ctx: AgentToolContext) {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("AI provider is not configured.");
+  const model = process.env.OPENAI_AGENT_MODEL || process.env.OPENAI_TEXT_MODEL;
+  if (!apiKey || !model) throw new Error("AI provider is not configured.");
   const client = new OpenAI({ apiKey });
-  // Keep a known-good fallback so the Agent still works when OPENAI_TEXT_MODEL is not set.
-  const model = process.env.OPENAI_AGENT_MODEL || process.env.OPENAI_TEXT_MODEL || "gpt-5-mini";
   const instructions = `You are CreatorFlow AI Agent, the central creator/business worker inside CreatorFlow AI. Use tools to complete multi-step creator workflows. You can create content, thumbnail briefs, video storyboards, repurpose content, prepare growth audits, read recent content, save explicitly approved content, build content plans and prepare schedules. Use web search when fresh public information is needed. Prefer the simplest reliable tool sequence. Never claim an action happened unless a tool actually completed it. Never fabricate analytics or live metrics. Never promise guaranteed followers, virality, watch time, sales or income. Save content only after the user explicitly asks to save it. External actions (publishing, sending messages, connecting accounts, financial/payment actions, or other irreversible actions) require explicit user confirmation immediately before execution; the current toolset intentionally does not execute them. Never expose secrets or ask the user to paste private API keys into chat. Use the user's language when practical. Return concise but useful, copy-ready results.`;
   const tools = [...CREATOR_AGENT_TOOLS, { type: "web_search" }] as any;
   let response = await client.responses.create({ model, instructions, input, tools });
