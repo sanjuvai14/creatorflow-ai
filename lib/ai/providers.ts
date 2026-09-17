@@ -8,13 +8,13 @@ export type ProviderConfig = {
   model: string;
 };
 
-/** Universal provider registry. Credentials remain server-side. */
+/** Universal provider registry. Credentials remain server-side. A provider is only considered configured when both its credential and explicit model are present. */
 export function getProviderConfigs(): ProviderConfig[] {
   return [
-    { name: "openai", label: "OpenAI", configured: Boolean(process.env.OPENAI_API_KEY), model: process.env.OPENAI_TEXT_MODEL || "gpt-5-mini" },
-    { name: "gemini", label: "Google Gemini", configured: Boolean(process.env.GEMINI_API_KEY), model: process.env.GEMINI_TEXT_MODEL || "gemini-flash-latest" },
-    { name: "anthropic", label: "Anthropic Claude", configured: Boolean(process.env.ANTHROPIC_API_KEY), model: process.env.ANTHROPIC_TEXT_MODEL || "claude-sonnet-4-5" },
-    { name: "grok", label: "xAI Grok", configured: Boolean(process.env.XAI_API_KEY), model: process.env.XAI_TEXT_MODEL || "grok-4.6" },
+    { name: "openai", label: "OpenAI", configured: Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_TEXT_MODEL), model: process.env.OPENAI_TEXT_MODEL || "" },
+    { name: "gemini", label: "Google Gemini", configured: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_TEXT_MODEL), model: process.env.GEMINI_TEXT_MODEL || "" },
+    { name: "anthropic", label: "Anthropic Claude", configured: Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_TEXT_MODEL), model: process.env.ANTHROPIC_TEXT_MODEL || "" },
+    { name: "grok", label: "xAI Grok", configured: Boolean(process.env.XAI_API_KEY && process.env.XAI_TEXT_MODEL), model: process.env.XAI_TEXT_MODEL || "" },
   ];
 }
 
