@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getProviderConfigs, resolveProvider, providerIsConfigured, type AIProviderId } from "@/lib/ai/providers";
 
 const MAX_TOPIC_LENGTH = 5000;
-const MAX_PAYLOAD_BYTES = 12000;
+const MAX_PAYLOAD_BYTES = 64 * 1024;
 const RATE_LIMIT = 10;
 const RATE_WINDOW_SECONDS = 3600;
 const PROVIDER_TIMEOUT_MS = 45000;
