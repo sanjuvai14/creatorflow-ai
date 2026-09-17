@@ -31,13 +31,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Could not reserve a credit." }, { status: 500 });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    // Never silently fall back to a paid image model. Image generation is enabled
+    // only when an explicit image model is configured on the server.
+    const imageModel = process.env.OPENAI_IMAGE_MODEL?.trim();
+    if (!process.env.OPENAI_API_KEY || !imageModel) {
       const refund = await refundCredit(user.id);
       return NextResponse.json({
-        demo: true,
+        error: refund.ok
+          ? "AI image generation is not configured on the server yet. Your credit was returned."
+          : "AI image generation is not configured on the server yet, and the credit could not be returned automatically.",
         credits: refund.credits ?? credits,
-        prompt: `DEMO IMAGE PROMPT\n\nType: ${type}\nStyle: ${style}\nRatio: ${aspectRatio}\nText: ${text || "None"}\n\n${prompt}`,
-      });
+      }, { status: 503 });
     }
 
     try {
@@ -45,7 +49,7 @@ export async function POST(req: Request) {
       const size = aspectRatio === "1:1" ? "1024x1024" : "1536x1024";
       const finalPrompt = `Create a professional ${type || "creator visual"}. Visual direction: ${style || "modern cinematic"}. Requested aspect ratio: ${aspectRatio || "16:9"}. Visible text requested: ${text || "No text"}. Main brief: ${prompt}. Make it polished, high contrast, clean composition, suitable for a professional creator brand. Avoid copyrighted logos.`;
       const result = await client.images.generate({
-        model: process.env.OPENAI_IMAGE_MODEL || "gpt-image-1",
+        model: imageModel,
         prompt: finalPrompt,
         size: size as "1024x1024" | "1536x1024",
         n: 1,
