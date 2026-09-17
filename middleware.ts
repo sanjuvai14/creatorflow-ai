@@ -17,6 +17,13 @@ export async function middleware(request: NextRequest) {
     (pathname.startsWith("/api/") && pathname !== "/api/health")
   );
 
+  // These endpoints perform their own authorization/signature checks and must not
+  // invoke Supabase auth middleware. Keeping them completely public also avoids
+  // edge-runtime failures when auth configuration is unavailable.
+  if (isPublicWebhook || isPublicAIStatus || pathname === "/api/health") {
+    return NextResponse.next();
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_SUPABASE_KEY;
 
