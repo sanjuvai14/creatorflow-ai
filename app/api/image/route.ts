@@ -34,29 +34,30 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
 
-    // Verify the user with the session client first, then reserve the credit through
-    // the privileged client. The database function explicitly permits service_role.
     const admin = createAdminClient();
     const { data: credits, error: creditError } = await admin.rpc("consume_credit", { p_user_id: user.id });
     if (creditError) {
       const message = creditError.message?.toLowerCase() || "";
-      console.error("CreatorFlow image credit reservation failed", { userId: user.id, message });
       if (message.includes("no credits")) return NextResponse.json({ error: "No credits left. Please upgrade or wait for your next credit reset." }, { status: 402 });
       if (message.includes("not authorized")) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
       return NextResponse.json({ error: "Could not reserve a credit. Please try again." }, { status: 500 });
     }
 
-    try {
-      if (!process.env.OPENAI_API_KEY) {
-        const refund = await refundCredit(user.id);
-        return NextResponse.json({
-          imageUrl: null,
-          credits: refund.credits ?? credits,
-          error: "Image generation is not configured on the server. Your credit was returned."
-        }, { status: 503 });
-      }
+    // Do not silently invoke a potentially paid image model. An explicit image
+    // model must be configured before real image generation can spend credits.
+    const model = process.env.OPENAI_IMAGE_MODEL?.trim();
+    if (!process.env.OPENAI_API_KEY || !model) {
+      const refund = await refundCredit(user.id);
+      return NextResponse.json({
+        imageUrl: null,
+        credits: refund.credits ?? credits,
+        error: refund.ok
+          ? "Image generation is not configured on the server yet. Your credit was returned."
+          : "Image generation is not configured on the server yet, and the credit could not be returned automatically."
+      }, { status: 503 });
+    }
 
-      const model = process.env.OPENAI_IMAGE_MODEL || "gpt-image-1";
+    try {
       const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       const size = aspectRatio === "1:1" ? "1024x1024" : "1536x1024";
       const textInstruction = text
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ imageUrl, revisedPrompt: image?.revised_prompt || fullPrompt, credits });
     } catch (error) {
       console.error("CreatorFlow image generation failed", {
-        model: process.env.OPENAI_IMAGE_MODEL || "gpt-image-1",
+        model,
         error: error instanceof Error ? error.message : String(error)
       });
       const refund = await refundCredit(user.id);
