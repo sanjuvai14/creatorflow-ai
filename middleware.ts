@@ -4,6 +4,22 @@ import { createServerClient } from "@supabase/ssr";
 const FALLBACK_SUPABASE_URL = "https://wckgvkfgxedyuysdibsw.supabase.co";
 const FALLBACK_SUPABASE_KEY = "sb_publishable_a5EYf9js-rdRpjeLlJVvzg_AEKHMVr8";
 
+function applySecurityHeaders(response: NextResponse, request: NextRequest) {
+  // Defense-in-depth headers. Authorization is still enforced by each API route.
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(self), geolocation=()");
+  response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+
+  // Never let authenticated API responses be stored by shared/intermediate caches.
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+  }
+
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isPublicWebhook = pathname === "/api/billing/webhook";
@@ -21,7 +37,7 @@ export async function middleware(request: NextRequest) {
   // invoke Supabase auth middleware. Keeping them completely public also avoids
   // edge-runtime failures when auth configuration is unavailable.
   if (isPublicWebhook || isPublicAIStatus || pathname === "/api/health") {
-    return NextResponse.next();
+    return applySecurityHeaders(NextResponse.next(), request);
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_SUPABASE_URL;
@@ -30,17 +46,17 @@ export async function middleware(request: NextRequest) {
   if (!supabaseUrl || !supabaseKey) {
     if (protectedPath) {
       if (pathname.startsWith("/api/")) {
-        return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+        return applySecurityHeaders(new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
           headers: { "Content-Type": "application/json" },
-        });
+        }), request);
       }
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
+      return applySecurityHeaders(NextResponse.redirect(url), request);
     }
-    return NextResponse.next();
+    return applySecurityHeaders(NextResponse.next(), request);
   }
 
   let response = NextResponse.next({ request });
@@ -63,25 +79,25 @@ export async function middleware(request: NextRequest) {
 
   if (protectedPath && !user) {
     if (pathname.startsWith("/api/")) {
-      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+      return applySecurityHeaders(new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
-      });
+      }), request);
     }
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+    return applySecurityHeaders(NextResponse.redirect(url), request);
   }
 
   if (pathname === "/login" && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";
-    return NextResponse.redirect(url);
+    return applySecurityHeaders(NextResponse.redirect(url), request);
   }
 
-  return response;
+  return applySecurityHeaders(response, request);
 }
 
 export const config = {
