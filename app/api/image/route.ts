@@ -6,7 +6,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+const MAX_BODY_BYTES = 16 * 1024;
 const MAX_PROMPT_LENGTH = 4000;
+const MAX_STYLE_LENGTH = 300;
+const MAX_TYPE_LENGTH = 100;
+const MAX_TEXT_LENGTH = 500;
+const ALLOWED_ASPECT_RATIOS = new Set(["1:1", "16:9", "4:5", "9:16"]);
 
 async function refundCredit(userId: string) {
   try {
@@ -20,15 +25,26 @@ async function refundCredit(userId: string) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => ({}));
-    const prompt = typeof body?.prompt === "string" ? body.prompt.trim() : "";
-    const style = typeof body?.style === "string" ? body.style.trim() : "Cinematic";
-    const type = typeof body?.type === "string" ? body.type.trim() : "Visual";
-    const text = typeof body?.text === "string" ? body.text.trim() : "";
-    const aspectRatio = typeof body?.aspectRatio === "string" ? body.aspectRatio : "1:1";
+    const raw = await req.text();
+    if (new TextEncoder().encode(raw).byteLength > MAX_BODY_BYTES) {
+      return NextResponse.json({ error: "Request body too large." }, { status: 413 });
+    }
+    let body: unknown;
+    try { body = JSON.parse(raw); } catch { return NextResponse.json({ error: "Invalid request body." }, { status: 400 }); }
+
+    const prompt = typeof (body as any)?.prompt === "string" ? (body as any).prompt.trim() : "";
+    const style = typeof (body as any)?.style === "string" ? (body as any).style.trim() : "Cinematic";
+    const type = typeof (body as any)?.type === "string" ? (body as any).type.trim() : "Visual";
+    const text = typeof (body as any)?.text === "string" ? (body as any).text.trim() : "";
+    const aspectRatio = typeof (body as any)?.aspectRatio === "string" ? (body as any).aspectRatio : "1:1";
 
     if (!prompt) return NextResponse.json({ error: "Prompt is required." }, { status: 400 });
-    if (prompt.length > MAX_PROMPT_LENGTH) return NextResponse.json({ error: "Prompt is too long." }, { status: 400 });
+    if (prompt.length > MAX_PROMPT_LENGTH || style.length > MAX_STYLE_LENGTH || type.length > MAX_TYPE_LENGTH || text.length > MAX_TEXT_LENGTH) {
+      return NextResponse.json({ error: "One or more image fields are too long." }, { status: 400 });
+    }
+    if (!ALLOWED_ASPECT_RATIOS.has(aspectRatio)) {
+      return NextResponse.json({ error: "Invalid aspect ratio." }, { status: 400 });
+    }
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -43,8 +59,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Could not reserve a credit. Please try again." }, { status: 500 });
     }
 
-    // Do not silently invoke a potentially paid image model. An explicit image
-    // model must be configured before real image generation can spend credits.
     const model = process.env.OPENAI_IMAGE_MODEL?.trim();
     if (!process.env.OPENAI_API_KEY || !model) {
       const refund = await refundCredit(user.id);
