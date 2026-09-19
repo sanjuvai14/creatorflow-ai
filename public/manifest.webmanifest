@@ -1,0 +1,13 @@
+{
+  "name": "CreateSoul AI",
+  "short_name": "CreateSoul",
+  "description": "AI workspace for creators, content and business workflows.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#070713",
+  "theme_color": "#070713",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["productivity", "business", "utilities"]
+}
