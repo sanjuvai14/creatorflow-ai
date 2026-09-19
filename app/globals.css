@@ -67,3 +67,8 @@
   .cf-tool-panel .cf-card{border-radius:18px}
 }
 @media(min-width:701px){.cf-mobile-title{display:none}.cf-mobile-bottom-nav{display:none!important}}
+
+
+/* Optional monetization surface: hidden unless NEXT_PUBLIC_ADS_ENABLED=true. No provider/account is configured by default. */
+.cs-ad-slot{margin:14px auto 18px;width:min(100%,520px);padding:8px 10px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.025);text-align:center;color:#666675;font-size:9px;letter-spacing:.8px}.cs-ad-slot span{display:block;margin-bottom:5px;text-transform:uppercase}.cs-ad-placeholder{min-height:52px;display:grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.02)}
+@media(max-width:700px){.cs-ad-slot{margin:10px auto 14px;width:100%;padding:7px 8px}.cs-ad-placeholder{min-height:44px}}
