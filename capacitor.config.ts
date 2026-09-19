@@ -6,7 +6,12 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     url: 'https://creatorflow-ai-sanjuvai14.vercel.app',
-    cleartext: false
+    cleartext: false,
+    allowNavigation: [
+      'creatorflow-ai-sanjuvai14.vercel.app',
+      'creatorflow-ai-psi.vercel.app',
+      'creatorflow-ai-git-main-sanjuvai14.vercel.app'
+    ]
   },
   android: {
     allowMixedContent: false
