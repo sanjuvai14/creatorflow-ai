@@ -15,7 +15,9 @@ This file is the single checklist for unfinished, partially verified, or intenti
   - Current blocker: explicit text/image model configuration is not present in production, so a real paid-provider generation test cannot be performed yet.
 
 - [x] **Production environment verification**
-  - Verified 2026-09-19: production deployment `dpl_8mgf8f4vPYS485HpAnkrEfdFh4wN` is `READY` and built from `main` commit `54720e37814740df1da7e4861753b66bee9bd455`.
+  - Verified 2026-09-19: latest production deployment `dpl_GbtwtCkUdcFfkKQ1AyX4KVRuGXDH` is `READY` and built from `main` commit `14dc5bd063e9660e9fe69be78a9c7cf460f25b2c` (`fix: avoid credit consumption when image provider is unconfigured`).
+  - Fresh endpoint verification on the latest production alias: `/api/health` returned 200 and `/api/ai-status-public` returned 200.
+  - Public AI status reports OpenAI credential present but no explicit OpenAI text/image models, so paid AI generation remains intentionally disabled.
   - `/api/health` returns 200; `/api/ai-status-public` returns 200 and reports provider/model readiness without exposing secrets.
   - Current production status reports the OpenAI credential is present, but explicit text/image model configuration is not present, so paid AI generation remains intentionally disabled.
   - `/api/system/status` correctly requires authentication.
