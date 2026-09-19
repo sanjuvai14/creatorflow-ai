@@ -12,8 +12,11 @@ This file is the single checklist for unfinished, partially verified, or intenti
   - Confirm credits are consumed only on successful provider resolution/output and refunded on failure.
   - Current blocker: recent diagnostic deployment/runtime behavior has not yet proven provider availability end-to-end.
 
-- [ ] **Production environment verification**
-  - Verify the latest deployment is built from the current `main` commit and that runtime environment variables are available to server routes.
+- [x] **Production environment verification**
+  - Verified 2026-09-19: production deployment `dpl_8mgf8f4vPYS485HpAnkrEfdFh4wN` is `READY` and built from `main` commit `54720e37814740df1da7e4861753b66bee9bd455`.
+  - `/api/health` returns 200; `/api/ai-status-public` returns 200 and reports provider/model readiness without exposing secrets.
+  - Current production status reports the OpenAI credential is present, but explicit text/image model configuration is not present, so paid AI generation remains intentionally disabled.
+  - `/api/system/status` correctly requires authentication.
   - Do not paste API keys into GitHub, chat, or client-side code.
 
 - [ ] **Image generation end-to-end test**
