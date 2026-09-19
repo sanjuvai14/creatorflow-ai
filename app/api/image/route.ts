@@ -71,12 +71,12 @@ export async function POST(req: Request) {
 
     try {
       const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      const size = aspectRatio === "1:1" ? "1024x1024" : "1536x1024";
+      const size = aspectRatio === "1:1" ? "1024x1024" : aspectRatio === "9:16" ? "1024x1536" : "1536x1024";
       const textInstruction = text
         ? `Include this exact text prominently in the design: ${text}. Keep spelling and capitalization exact.`
         : "Do not add any words, captions, logos, or watermarks unless requested.";
       const fullPrompt = [
-        `Create a polished ${type} for CreatorFlow AI.`,
+        `Create a polished ${type} for CreateSoul AI.`,
         `Visual style: ${style}.`,
         `Aspect ratio: ${aspectRatio}.`,
         `User brief: ${prompt}`,
