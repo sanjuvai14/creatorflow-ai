@@ -50,6 +50,16 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
 
+    const model = process.env.OPENAI_IMAGE_MODEL?.trim();
+    if (!process.env.OPENAI_API_KEY || !model) {
+      return NextResponse.json({
+        imageUrl: null,
+        credits: null,
+        error: "Image generation is not configured on the server yet. Your credits were not used.",
+        code: "AI_IMAGE_PROVIDER_NOT_CONFIGURED"
+      }, { status: 503 });
+    }
+
     const admin = createAdminClient();
     const { data: credits, error: creditError } = await admin.rpc("consume_credit", { p_user_id: user.id });
     if (creditError) {
@@ -57,18 +67,6 @@ export async function POST(req: Request) {
       if (message.includes("no credits")) return NextResponse.json({ error: "No credits left. Please upgrade or wait for your next credit reset." }, { status: 402 });
       if (message.includes("not authorized")) return NextResponse.json({ error: "Not authorized." }, { status: 403 });
       return NextResponse.json({ error: "Could not reserve a credit. Please try again." }, { status: 500 });
-    }
-
-    const model = process.env.OPENAI_IMAGE_MODEL?.trim();
-    if (!process.env.OPENAI_API_KEY || !model) {
-      const refund = await refundCredit(user.id);
-      return NextResponse.json({
-        imageUrl: null,
-        credits: refund.credits ?? credits,
-        error: refund.ok
-          ? "Image generation is not configured on the server yet. Your credit was returned."
-          : "Image generation is not configured on the server yet, and the credit could not be returned automatically."
-      }, { status: 503 });
     }
 
     try {
