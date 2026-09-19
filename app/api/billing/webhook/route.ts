@@ -249,14 +249,30 @@ export async function POST(request: Request) {
       let creditDelta = 0;
 
       if (approved && reversing && Number(original.credits) > 0) {
-        if (data.type === "full") {
-          creditDelta = -Number(original.credits);
-        } else {
-          const adjustedTotal = parseAmount(data.totals?.total) || 0;
-          const originalAmount = Number(original.amount_minor) || 0;
-          if (adjustedTotal > 0 && originalAmount > 0) {
-            const ratio = Math.min(1, adjustedTotal / originalAmount);
-            creditDelta = -Math.max(1, Math.ceil(Number(original.credits) * ratio));
+        const { data: priorReversals, error: reversalError } = await admin
+          .from("credit_ledger")
+          .select("delta")
+          .eq("provider", "paddle")
+          .eq("provider_transaction_id", transactionId)
+          .lt("delta", 0);
+        if (reversalError) throw reversalError;
+
+        const alreadyReversed = Math.min(
+          Number(original.credits),
+          (priorReversals || []).reduce((sum: number, row: { delta: number | null }) => sum + Math.abs(Number(row.delta) || 0), 0),
+        );
+        const remainingCredits = Math.max(0, Number(original.credits) - alreadyReversed);
+
+        if (remainingCredits > 0) {
+          if (data.type === "full") {
+            creditDelta = -remainingCredits;
+          } else {
+            const adjustedTotal = parseAmount(data.totals?.total) || 0;
+            const originalAmount = Number(original.amount_minor) || 0;
+            if (adjustedTotal > 0 && originalAmount > 0) {
+              const ratio = Math.min(1, adjustedTotal / originalAmount);
+              creditDelta = -Math.min(remainingCredits, Math.max(1, Math.ceil(Number(original.credits) * ratio)));
+            }
           }
         }
       }
