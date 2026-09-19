@@ -32,12 +32,12 @@ export default function AutoSocialSetup() {
     </div>
 
     <div style={{marginTop:18,padding:15,borderRadius:14,background:"rgba(255,255,255,.035)",border:"1px solid rgba(255,255,255,.07)"}}>
-      <b>What CreatorFlow prepares</b>
+      <b>What CreateSoul prepares</b>
       <div style={{display:"grid",gap:6,marginTop:9,fontSize:13,opacity:.8}}><span>✓ AI-generated name, bio & positioning</span><span>✓ Profile/cover/branding brief</span><span>✓ First-post/content launch pack</span><span>✓ OAuth/authorization checklist</span><span>✓ Platform-specific setup status</span></div>
     </div>
 
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,marginTop:18,flexWrap:"wrap"}}><span style={{fontSize:12,opacity:.65}}>{selected.length ? `${selected.length} platform${selected.length>1?"s":""} selected • ${region}` : "Select one or more platforms to start"}</span><button className="cf-btn cf-generate" disabled={!selected.length} onClick={()=>setStarted(true)}>Start Auto Setup</button></div>
     {started&&<div style={{marginTop:16,padding:16,borderRadius:14,border:"1px solid rgba(139,124,255,.35)",background:"rgba(139,124,255,.08)"}}><b>Setup pack prepared ✓</b><div style={{display:"grid",gap:7,marginTop:9,fontSize:13}}><span>1. Brand name, bio and positioning brief</span><span>2. Profile + cover visual brief</span><span>3. First 5 launch-post ideas</span><span>4. Official OAuth connection checklist</span><span>5. Manual approval step before any external account change</span></div><small style={{display:"block",marginTop:10,opacity:.65}}>No platform account was changed. Live publishing/connection will require official authorization.</small></div>}
-    <p style={{fontSize:11,opacity:.5,marginTop:12}}>Paid automation can be connected later through CreatorFlow billing/credits. Passwords and OTPs should never be stored by CreatorFlow.</p>
+    <p style={{fontSize:11,opacity:.5,marginTop:12}}>Paid automation can be connected later through CreateSoul billing/credits. Passwords and OTPs should never be stored by CreateSoul.</p>
   </div>;
 }
