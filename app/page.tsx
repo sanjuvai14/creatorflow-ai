@@ -1,12 +1,12 @@
 import Link from "next/link";
 
 const tools = [
-  ["✦", "YouTube Studio", "Titles, descriptions, tags and scripts"],
-  ["◈", "Shorts & Reels", "Hooks, scripts and captions"],
-  ["◉", "Social Posts", "Facebook, Instagram and TikTok"],
-  ["◇", "Product Copy", "Conversion-focused product descriptions"],
-  ["⬢", "Visual Creator", "Thumbnails, banners and creator visuals"],
-  ["↗", "Real Growth", "Audience discovery, trends and organic growth strategy"],
+  ["✦", "YouTube Studio", "Titles, descriptions, tags and scripts", "/dashboard?tool=YouTube%20Studio&platform=youtube"],
+  ["◈", "Shorts & Reels", "Hooks, scripts and captions", "/dashboard?tool=Shorts%20%26%20Reels&platform=general"],
+  ["◉", "Social Posts", "Facebook, Instagram and TikTok", "/dashboard?tool=Social%20Posts&platform=general"],
+  ["◇", "Product Copy", "Conversion-focused product descriptions", "/dashboard?tool=Product%20Copy&platform=shopify"],
+  ["⬢", "Visual Creator", "Thumbnails, banners and creator visuals", "/images"],
+  ["↗", "Real Growth", "Audience discovery, trends and organic growth strategy", "/growth"],
 ];
 
 export default function Home() {
@@ -64,13 +64,13 @@ export default function Home() {
           <p className="cf-muted">One premium workspace for turning a thought into something people can see, read and share.</p>
         </div>
         <div className="cs-tool-grid">
-          {tools.map(([icon, title, desc]) => (
-            <div className="cf-card cs-tool-card cf-glow" key={title}>
+          {tools.map(([icon, title, desc, href]) => (
+            <Link href={href} className="cf-card cs-tool-card cf-glow" key={title} aria-label={"Open " + title}>
               <div className="cs-tool-icon">{icon}</div>
               <h3>{title}</h3>
               <p className="cf-muted">{desc}</p>
               <span className="cs-card-arrow">↗</span>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
