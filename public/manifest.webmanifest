@@ -9,5 +9,17 @@
   "theme_color": "#070713",
   "orientation": "portrait-primary",
   "lang": "en",
-  "categories": ["productivity", "business", "utilities"]
+  "categories": [
+    "productivity",
+    "business",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }
