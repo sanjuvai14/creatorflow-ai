@@ -1,3 +1,89 @@
 import Link from "next/link";
-const tools=[["🎬","YouTube Studio","Titles, descriptions, tags and scripts"],["⚡","Shorts & Reels","Hooks, scripts and captions"],["📱","Social Posts","Facebook, Instagram and TikTok"],["🛍️","Product Copy","Conversion-focused product descriptions"],["🖼️","Visual Creator","Thumbnails, banners and creator visuals"],["🎯","Real Growth","Audience discovery, trends and organic growth strategy"]];
-export default function Home(){return <main style={{minHeight:"100vh",overflow:"hidden"}}><nav style={{maxWidth:1180,margin:"0 auto",padding:20,display:"flex",justifyContent:"space-between",alignItems:"center",gap:16}}><Link href="/" style={{fontWeight:900,fontSize:22}}>Creator<span style={{color:"#8b7cff"}}>Flow</span> <span style={{fontSize:12,opacity:.75}}>AI</span></Link><div style={{display:"flex",gap:10,flexWrap:"wrap"}}><Link href="/growth" className="cf-icon-btn">Real Growth</Link><Link href="/pricing" className="cf-icon-btn">Pricing</Link><Link href="/login" className="cf-btn">Sign in</Link></div></nav><section style={{maxWidth:1050,margin:"48px auto 0",padding:"34px 20px 20px",textAlign:"center"}}><div className="cf-eyebrow">THE CREATOR WORKSPACE</div><h1 style={{fontSize:"clamp(44px,9vw,86px)",lineHeight:.98,margin:"18px 0 22px"}}>Create faster.<br/><span style={{background:"linear-gradient(90deg,#9b87ff,#22d3ee)",WebkitBackgroundClip:"text",color:"transparent"}}>Grow smarter.</span></h1><p className="cf-muted" style={{fontSize:"clamp(16px,2.2vw,20px)",lineHeight:1.6,maxWidth:700,margin:"0 auto 30px"}}>Turn one idea into ready-to-publish content, social copy, product descriptions, creator visuals and an organic growth plan from one simple AI workspace.</p><div style={{display:"flex",justifyContent:"center",gap:12,flexWrap:"wrap"}}><Link href="/login" className="cf-btn">Start Creating Free →</Link><Link href="/growth" className="cf-icon-btn">Explore Real Growth</Link></div></section><section style={{maxWidth:1180,margin:"62px auto",padding:20,display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(205px,1fr))",gap:16}}>{tools.map(([icon,title,desc])=><div className="cf-card cf-glow" key={title} style={{padding:24,minHeight:170}}><div style={{fontSize:30,marginBottom:12}}>{icon}</div><h3 style={{margin:"0 0 8px"}}>{title}</h3><p className="cf-muted" style={{margin:0,lineHeight:1.55,fontSize:14}}>{desc}</p></div>)}</section><section style={{maxWidth:900,margin:"0 auto 80px",padding:20}}><div className="cf-card cf-glow" style={{padding:"30px 24px",textAlign:"center"}}><div className="cf-eyebrow">ONE WORKSPACE. MANY LANGUAGES.</div><h2>Your ideas. One workspace.</h2><p className="cf-muted">Create content in English, বাংলা, Hindi, Spanish, Portuguese, French, German, Arabic, Indonesian and Turkish.</p><Link href="/login" className="cf-btn">Enter CreatorFlow AI</Link></div></section></main>}
+
+const tools = [
+  ["✦", "YouTube Studio", "Titles, descriptions, tags and scripts"],
+  ["◈", "Shorts & Reels", "Hooks, scripts and captions"],
+  ["◉", "Social Posts", "Facebook, Instagram and TikTok"],
+  ["◇", "Product Copy", "Conversion-focused product descriptions"],
+  ["⬢", "Visual Creator", "Thumbnails, banners and creator visuals"],
+  ["↗", "Real Growth", "Audience discovery, trends and organic growth strategy"],
+];
+
+export default function Home() {
+  return (
+    <main className="cs-home">
+      <div className="cs-orb cs-orb-one" />
+      <div className="cs-orb cs-orb-two" />
+
+      <nav className="cs-nav">
+        <Link href="/" className="cs-brand" aria-label="CreateSoul AI home">
+          <span className="cs-logo-mark"><span>✦</span></span>
+          <span>Create<span> Soul</span><small>AI</small></span>
+        </Link>
+        <div className="cs-nav-actions">
+          <Link href="/growth" className="cf-icon-btn">Real Growth</Link>
+          <Link href="/pricing" className="cf-icon-btn">Pricing</Link>
+          <Link href="/login" className="cf-btn">Sign in</Link>
+        </div>
+      </nav>
+
+      <section className="cs-hero">
+        <div className="cs-hero-copy">
+          <div className="cf-eyebrow">THE AI CREATION SPACE</div>
+          <div className="cs-floating-badge">✦ Your ideas, amplified by AI</div>
+          <h1>Where <span>ideas</span><br />become real.</h1>
+          <p>Create, refine and bring your vision to life with one intelligent workspace for content, visuals, growth and creator workflows.</p>
+          <div className="cs-hero-actions">
+            <Link href="/login" className="cf-btn">Start Creating Free →</Link>
+            <Link href="/growth" className="cf-icon-btn">Explore the workspace</Link>
+          </div>
+          <div className="cs-trust">Built for creators · Phone, tablet and PC · 10+ languages</div>
+        </div>
+
+        <div className="cs-hero-visual" aria-label="CreateSoul AI 3D concept">
+          <div className="cs-glass-stage">
+            <div className="cs-soul">
+              <div className="cs-soul-core">✦</div>
+              <div className="cs-ring cs-ring-a" />
+              <div className="cs-ring cs-ring-b" />
+            </div>
+            <div className="cs-stage-label">CREATE<br /><b>SOUL</b><small>AI</small></div>
+            <div className="cs-chip cs-chip-a">CREATE</div>
+            <div className="cs-chip cs-chip-b">INSPIRE</div>
+            <div className="cs-chip cs-chip-c">GROW</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="cs-tools">
+        <div className="cs-section-head">
+          <div>
+            <div className="cf-eyebrow">ONE SOUL. MANY CREATIONS.</div>
+            <h2>Everything your idea needs.</h2>
+          </div>
+          <p className="cf-muted">One premium workspace for turning a thought into something people can see, read and share.</p>
+        </div>
+        <div className="cs-tool-grid">
+          {tools.map(([icon, title, desc]) => (
+            <div className="cf-card cs-tool-card cf-glow" key={title}>
+              <div className="cs-tool-icon">{icon}</div>
+              <h3>{title}</h3>
+              <p className="cf-muted">{desc}</p>
+              <span className="cs-card-arrow">↗</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="cs-final">
+        <div className="cf-card cs-final-card">
+          <div className="cs-mini-mark">✦</div>
+          <div className="cf-eyebrow">CREATE WITH PURPOSE</div>
+          <h2>Your idea deserves more than a blank page.</h2>
+          <p className="cf-muted">Bring your thoughts, prompts and plans into CreateSoul AI and turn them into ready-to-use creator work.</p>
+          <Link href="/login" className="cf-btn">Enter CreateSoul AI →</Link>
+        </div>
+      </section>
+    </main>
+  );
+}
