@@ -7,6 +7,8 @@ This file is the single checklist for unfinished, partially verified, or intenti
 ## 🔴 Critical — finish before calling the core app READY
 
 - [ ] **AI runtime generation verification**
+  - Fresh production check 2026-09-19: `/api/health` returned 200 and `/api/ai-status-public` returned 200.
+  - Public status confirms the OpenAI credential is present, while `OPENAI_TEXT_MODEL` and `OPENAI_IMAGE_MODEL` are absent; therefore no paid AI request was attempted and no credit was consumed by this verification.
   - Confirm the production runtime sees the configured AI provider key without exposing any secret.
   - Confirm `/api/generate` returns a real AI response for an authenticated user.
   - Confirm credits are consumed only on successful provider resolution/output and refunded on failure.
