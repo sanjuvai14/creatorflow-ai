@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     const tone = typeof input.tone === "string" ? input.tone.trim().slice(0, 80) : "Professional";
     const tool = typeof input.tool === "string" ? input.tool.trim().slice(0, 80) : "AI Agent";
     const platform = typeof input.platform === "string" ? input.platform.trim().slice(0, 80) : "General";
-    const workflowContext = `CreatorFlow context: provider=${provider}; language=${language}; tone=${tone}; tool=${tool}; platform=${platform}. Follow these preferences unless the user's message explicitly overrides them.`;
+    const workflowContext = `CreateSoul context: provider=${provider}; language=${language}; tone=${tone}; tool=${tool}; platform=${platform}. Follow these preferences unless the user's message explicitly overrides them.`;
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
     const orderedHistory = (history ?? []).reverse();
     let historyText = "";
     for (const item of orderedHistory) {
-      const line = `${item.role === "assistant" ? "CreatorFlow" : "User"}: ${String(item.content ?? "").slice(0, 6000)}`;
+      const line = `${item.role === "assistant" ? "CreateSoul AI" : "User"}: ${String(item.content ?? "").slice(0, 6000)}`;
       if ((historyText + line + "\n").length > MAX_HISTORY_CHARS) break;
       historyText += line + "\n";
     }
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
 export async function GET() {
   return NextResponse.json({
     success: true,
-    agent: "CreatorFlow AI Agent",
+    agent: "CreateSoul AI Agent",
     capabilities: [
       "multi-step reasoning",
       "web research",
