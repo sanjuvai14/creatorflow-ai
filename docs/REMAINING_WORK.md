@@ -1,6 +1,6 @@
 # CreatorFlow AI — Remaining Work Tracker
 
-Last updated: 2026-09-15
+Last updated: 2026-09-19
 
 This file is the single checklist for unfinished, partially verified, or intentionally deferred work. Update it whenever a task is completed.
 
@@ -10,7 +10,7 @@ This file is the single checklist for unfinished, partially verified, or intenti
   - Confirm the production runtime sees the configured AI provider key without exposing any secret.
   - Confirm `/api/generate` returns a real AI response for an authenticated user.
   - Confirm credits are consumed only on successful provider resolution/output and refunded on failure.
-  - Current blocker: recent diagnostic deployment/runtime behavior has not yet proven provider availability end-to-end.
+  - Current blocker: explicit text/image model configuration is not present in production, so a real paid-provider generation test cannot be performed yet.
 
 - [x] **Production environment verification**
   - Verified 2026-09-19: production deployment `dpl_8mgf8f4vPYS485HpAnkrEfdFh4wN` is `READY` and built from `main` commit `54720e37814740df1da7e4861753b66bee9bd455`.
@@ -63,6 +63,10 @@ This file is the single checklist for unfinished, partially verified, or intenti
 - [ ] Verify rate limiting under normal client usage.
 - [ ] Verify no server secrets are exposed in browser responses/logs.
 - [ ] Verify production error messages are user-friendly and do not reveal internal configuration.
+- [x] **Production runtime error scan — 2026-09-19**
+  - Checked the production project runtime error aggregation for the last 24 hours.
+  - Result: no runtime errors found in the selected time range.
+  - Historical errors remain in the 7-day aggregation, including an older billing-webhook configuration error and an older middleware Supabase configuration error; these were not observed in the latest 24-hour scan.
 
 ## Platform catalog status
 
