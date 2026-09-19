@@ -65,12 +65,12 @@ export default function Home() {
         </div>
         <div className="cs-tool-grid">
           {tools.map(([icon, title, desc, href]) => (
-            <Link href={href} className="cf-card cs-tool-card cf-glow" key={title} aria-label={"Open " + title}>
+            <a href={href} className="cf-card cs-tool-card cf-glow" key={title} aria-label={"Open " + title}>
               <div className="cs-tool-icon">{icon}</div>
               <h3>{title}</h3>
               <p className="cf-muted">{desc}</p>
               <span className="cs-card-arrow">↗</span>
-            </Link>
+            </a>
           ))}
         </div>
       </section>
