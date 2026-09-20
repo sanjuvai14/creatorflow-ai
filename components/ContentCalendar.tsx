@@ -7,7 +7,7 @@ const platforms=["YouTube","Instagram","TikTok","Facebook","LinkedIn","X","Threa
 const types=["Long video","Short video","Post","Carousel","Thread","Newsletter","Article"];
 const hooks=["Stop scrolling—try this simple approach.","3 mistakes creators should avoid.","Here is the practical step-by-step.","If I started today, I would do this first."];
 const ctas=["Save this for later.","Comment with your biggest challenge.","Follow for the next practical tip.","Share with a creator who needs this."];
-const STORAGE_KEY="creatorflow:content-calendar-plans";
+const STORAGE_KEY="createsoul:content-calendar-plans";
 const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const dateFor=(start:string,i:number)=>{const d=new Date(`${start}T12:00:00`);d.setDate(d.getDate()+i);return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});};
 const csvCell=(value:string|number)=>`"${String(value).replace(/"/g,'""')}"`;
@@ -18,7 +18,7 @@ export default function ContentCalendar(){
  useEffect(()=>{try{const raw=localStorage.getItem(STORAGE_KEY);if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed))setSavedPlans(parsed.filter(p=>p&&typeof p.id==="string"&&Array.isArray(p.rows)).slice(0,10));}}catch{}finally{setHydrated(true)}},[]);
  useEffect(()=>{if(hydrated)try{localStorage.setItem(STORAGE_KEY,JSON.stringify(savedPlans))}catch{}},[savedPlans,hydrated]);
  const copy=async()=>{const text=rows.map(r=>`${r.date} | ${r.platform} | ${r.type}\n${r.topic}\nHook: ${r.hook}\nCTA: ${r.cta}`).join("\n\n");try{await navigator.clipboard.writeText(text);setCopied(true);setTimeout(()=>setCopied(false),1800)}catch{setCopied(false)}};
- const downloadCsv=()=>{const header=["Day","Date","Platform","Format","Topic","Hook","CTA"];const body=rows.map(r=>[r.day,r.date,r.platform,r.type,r.topic,r.hook,r.cta].map(csvCell).join(","));const blob=new Blob([[header.map(csvCell).join(","),...body].join("\n")],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`creatorflow-content-calendar-${start}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setDownloaded(true);setTimeout(()=>setDownloaded(false),1800)};
+ const downloadCsv=()=>{const header=["Day","Date","Platform","Format","Topic","Hook","CTA"];const body=rows.map(r=>[r.day,r.date,r.platform,r.type,r.topic,r.hook,r.cta].map(csvCell).join(","));const blob=new Blob([[header.map(csvCell).join(","),...body].join("\n")],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`createsoul-content-calendar-${start}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);setDownloaded(true);setTimeout(()=>setDownloaded(false),1800)};
  const savePlan=()=>{const plan:SavedPlan={id:crypto.randomUUID(),savedAt:new Date().toISOString(),start,days,topic,goal,rows};setSavedPlans(prev=>[plan,...prev].slice(0,10));setSaved(true);setTimeout(()=>setSaved(false),1800)};
  const loadPlan=(plan:SavedPlan)=>{setStart(plan.start);setDays(plan.days);setTopic(plan.topic);setGoal(plan.goal)};
  const deletePlan=(id:string)=>setSavedPlans(prev=>prev.filter(p=>p.id!==id));
