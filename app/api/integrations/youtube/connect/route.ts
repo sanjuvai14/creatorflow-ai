@@ -22,8 +22,8 @@ export async function GET(request: Request) {
   const issuedAt = Date.now();
   const payload = Buffer.from(JSON.stringify({ userId: user.id, nonce, issuedAt }), "utf8").toString("base64url");
   const state = `${payload}.${signState(payload, encryptionKey)}`;
-  const response = NextResponse.redirect(new URL("https://accounts.google.com/o/oauth2/v2/auth"));
-  response.headers.set("Location", `https://accounts.google.com/o/oauth2/v2/auth?${new URLSearchParams({
+  const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  authUrl.search = new URLSearchParams({
     client_id: clientId,
     redirect_uri: `${appUrl}/api/integrations/youtube/callback`,
     response_type: "code",
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     scope: "https://www.googleapis.com/auth/youtube.readonly",
     state,
   }).toString()}`);
-  response.cookies.set("creatorflow_oauth_state", state, {
+  const response = NextResponse.redirect(authUrl);\n  response.cookies.set("createsoul_oauth_state", state, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
