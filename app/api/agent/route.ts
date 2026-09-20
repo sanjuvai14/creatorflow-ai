@@ -94,7 +94,8 @@ export async function POST(req: Request) {
     if (userMessageError) return NextResponse.json({ error: "Could not save your message." }, { status: 503 });
 
     const context = historyText ? `Conversation history (use this only for continuity; do not repeat it unless useful):\n${historyText}` : "This is the start of a new conversation.";
-    const result = await runAgentForUser(`${workflowContext}\n\n${context}\nUser request:\n${message}`, user.id);
+    const preferredProvider = provider.toLowerCase().replace(/\s+/g, "");
+    const result = await runAgentForUser(`${workflowContext}\n\n${context}\nUser request:\n${message}`, user.id, preferredProvider === "autoai" ? "auto" : preferredProvider);
 
     const { error: assistantMessageError } = await supabase.from("agent_messages").insert({
       conversation_id: activeConversationId,
