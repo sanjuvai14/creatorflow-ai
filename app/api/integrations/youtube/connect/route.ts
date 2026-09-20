@@ -31,8 +31,10 @@ export async function GET(request: Request) {
     prompt: "consent",
     scope: "https://www.googleapis.com/auth/youtube.readonly",
     state,
-  }).toString()}`);
-  const response = NextResponse.redirect(authUrl);\n  response.cookies.set("createsoul_oauth_state", state, {
+  }).toString();
+
+  const response = NextResponse.redirect(authUrl);
+  response.cookies.set("createsoul_oauth_state", state, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
