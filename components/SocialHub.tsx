@@ -11,9 +11,12 @@ const featureGroups = [
   { id:"workspace", name:"Workspace", icon:"▦", features:["Multiple brands","Customer groups","Team members","Roles & permissions","Comments","Content collaboration","Client approval","Shared media library","Dark / light mode","Activity history"] },
   { id:"media", name:"Media", icon:"▣", features:["Media library","Image uploads","Video uploads","Post attachments","Thumbnail assets","Reusable brand assets","Asset search","Content-to-media workflow"] },
   { id:"integrations", name:"Connections", icon:"⌘", features:["Official OAuth connections","Channel management","Connection status","Reconnect flow","Disconnect flow","Token-safe server storage","Live publishing gateway","Platform capability detection"] },
+  { id:"inbox", name:"Inbox & Engagement", icon:"◉", features:["Unified inbox","Comment queue","DM triage","Reply drafts","AI reply suggestions","Assignment & mentions","Moderation queue","Approval-required replies"] },
+  { id:"editor", name:"Creative Editor", icon:"✎", features:["Advanced picture editor","Crop and resize","Brand templates","Reusable layouts","Thumbnail editor","AI image generation gateway","AI short-video generation gateway"] },
+  { id:"admin", name:"Admin & Safety", icon:"⚙", features:["Workspace settings","Roles and permissions","Audit trail","Connection health","Rate limits","Approval gates","Secret-safe architecture","Usage and credit controls"] },
 ];
 
-const channels = ["Facebook","Instagram","YouTube","TikTok","LinkedIn","X","Pinterest","Threads","Reddit","Telegram","WhatsApp Business","Medium","WordPress","Google Business Profile","Shopify","Email"];
+const channels = ["Facebook","Instagram","YouTube","TikTok","LinkedIn","X","Pinterest","Threads","Reddit","Telegram","WhatsApp Business","Medium","WordPress","Google Business Profile","Shopify","Email","Discord","Bluesky","Mastodon","Nostr","Farcaster","Dev.to","Hashnode","Twitch","Skool","Slack"];
 
 export default function SocialHub(){
   const [query,setQuery]=useState("");
