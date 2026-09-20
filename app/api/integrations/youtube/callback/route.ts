@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  const cookieState = request.headers.get("cookie")?.match(/(?:^|; )creatorflow_oauth_state=([^;]+)/)?.[1];
+  const cookieState = request.headers.get("cookie")?.match(/(?:^|; )createsoul_oauth_state=([^;]+)/)?.[1];
   const fail = (reason: string) => NextResponse.redirect(new URL(`/settings?integration=youtube&error=${encodeURIComponent(reason)}`, request.url));
 
   if (!code || !state || !cookieState || state !== cookieState) return fail("invalid_oauth_state");
