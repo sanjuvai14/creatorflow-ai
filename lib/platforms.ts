@@ -15,7 +15,17 @@ export const platforms:Platform[]=[
 {id:"medium",name:"Medium",icon:"M",group:"Publishing",status:"ready",tools:["Article outlines","Article drafts","Titles","SEO summaries","Content calendar"]},
 {id:"wordpress",name:"WordPress",icon:"W",group:"Publishing",status:"connect",tools:["Blog drafts","SEO titles","Meta descriptions","Content calendar","Update briefs"]},
 {id:"google-business",name:"Google Business Profile",icon:"G",group:"Business",status:"connect",tools:["Post drafts","Offer copy","Update copy","Review-response drafts","Local content ideas"]},
-{id:"email",name:"Email Marketing",icon:"✉",group:"Marketing",status:"ready",tools:["Campaign copy","Subject lines","Welcome sequence","Newsletter drafts","CTA ideas","Content calendar"]},
+{id:"email",name:"Email Marketing",icon:"✉",group:"Marketing",status:"ready",tools:["Campaign copy","Subject lines","Welcome sequence","Newsletter drafts","CTA ideas","Content calendar"]},\n{id:"discord",name:"Discord",icon:"◌",group:"Community",status:"connect",tools:["Channel posts","Announcement copy","Content calendar","Webhook automation"]},
+{id:"bluesky",name:"Bluesky",icon:"✦",group:"Social",status:"connect",tools:["Post writer","Thread planner","Content calendar","Cross-posting"]},
+{id:"mastodon",name:"Mastodon",icon:"M",group:"Social",status:"connect",tools:["Post writer","Content calendar","Cross-posting","Hashtag ideas"]},
+{id:"nostr",name:"Nostr",icon:"N",group:"Community",status:"connect",tools:["Post writer","Content calendar","Cross-posting"]},
+{id:"farcaster",name:"Farcaster",icon:"F",group:"Community",status:"connect",tools:["Post writer","Content calendar","Cross-posting"]},
+{id:"devto",name:"Dev.to",icon:"D",group:"Publishing",status:"connect",tools:["Article drafts","Titles","SEO summaries","Content calendar"]},
+{id:"hashnode",name:"Hashnode",icon:"H",group:"Publishing",status:"connect",tools:["Article drafts","Titles","SEO summaries","Content calendar"]},
+{id:"twitch",name:"Twitch",icon:"T",group:"Video",status:"connect",tools:["Stream announcements","Clip captions","Content calendar"]},
+{id:"skool",name:"Skool",icon:"S",group:"Community",status:"connect",tools:["Community posts","Announcement copy","Content calendar"]},
+{id:"slack",name:"Slack",icon:"S",group:"Messaging",status:"connect",tools:["Channel announcements","Webhook automation","Content notifications"]},
+
 {id:"blog",name:"Blog & SEO",icon:"✎",group:"Publishing",status:"ready",tools:["Topic research brief","Outline","Article draft","SEO title","Meta description","Internal-link ideas","Content refresh"]},
 ];
 export const toolCategories=[
@@ -24,5 +34,8 @@ export const toolCategories=[
 {id:"seo",name:"SEO & Discovery",desc:"Improve discoverability with useful, platform-specific copy.",tools:["Titles","Descriptions","Keywords","Tags","Hashtag ideas","Meta descriptions","Product SEO"]},
 {id:"commerce",name:"Commerce",desc:"Create and improve ecommerce content.",tools:["Product descriptions","Product titles","Collection copy","Store content","Ad copy drafts","Email copy","Product FAQs"]},
 {id:"visual",name:"Visual Studio",desc:"Create thumbnails, banners and social visuals.",tools:["YouTube thumbnails","Social posts","Reel covers","Channel banners","Product visuals","Brand graphics"]},
-{id:"business",name:"Business & Marketing",desc:"Support brands and small businesses with repeatable content workflows.",tools:["Brand voice brief","Campaign planner","Email campaigns","Offer copy","Review-response drafts","Lead-magnet copy"]},
+{id:"business",name:"Business & Marketing",desc:"Support brands and small businesses with repeatable content workflows.",tools:["Brand voice brief","Campaign planner","Email campaigns","Offer copy","Review-response drafts","Lead-magnet copy"]},,
+{id:"engagement",name:"Engagement & Inbox",desc:"Centralize replies, comments and approval-oriented engagement workflows.",tools:["Unified inbox","Comment queue","DM triage","Reply drafts","AI reply suggestions","Assignment & mentions","Moderation queue"]},
+{id:"creative",name:"Creative Editor",desc:"Prepare media for publishing with reusable editing workflows.",tools:["Advanced picture editor","Crop & resize","Brand templates","Media transformations","AI image generation","AI short-video generation","Thumbnail editor"]},
+{id:"agentic",name:"Agent & Automation",desc:"Let the assistant plan, create, schedule and trigger guarded automations.",tools:["Smart social agent","Natural-language scheduling","Automation rules","Milestone triggers","Internal automations","Global automations","RSS auto-post","Webhook actions","REST API"]}
 ];
