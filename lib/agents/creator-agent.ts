@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { resolveProvider, providerIsConfigured, type AIProviderId } from "@/lib/ai/providers";
 
 export type AgentToolContext = { userId: string };
 
@@ -66,10 +67,14 @@ async function executeTool(name: string, args: Record<string, unknown>, ctx: Age
   throw new Error(`Unknown agent tool: ${name}`);
 }
 
-export async function runCreatorAgent(input: string, ctx: AgentToolContext) {
+export async function runCreatorAgent(input: string, ctx: AgentToolContext, preferredProvider?: AIProviderId | string) {
+  const provider = resolveProvider(preferredProvider);
+  if (!provider) throw new Error("No configured AI provider is available.");
+  if (provider !== "openai") throw new Error(`The selected AI provider (${provider}) is configured but this agent currently supports OpenAI execution only.`);
+  if (!providerIsConfigured("openai")) throw new Error("OpenAI is not configured for agent execution.");
   const apiKey = process.env.OPENAI_API_KEY;
   const model = process.env.OPENAI_AGENT_MODEL || process.env.OPENAI_TEXT_MODEL;
-  if (!apiKey || !model) throw new Error("AI provider is not configured.");
+  if (!apiKey || !model) throw new Error("OpenAI is not configured for agent execution.");
   const client = new OpenAI({ apiKey });
   const instructions = `You are CreateSoul AI Agent, the central creator/business worker inside CreateSoul AI. Use tools to complete multi-step creator workflows. You can create content, thumbnail briefs, video storyboards, repurpose content, prepare growth audits, read recent content, save explicitly approved content, build content plans and prepare schedules. Use web search when fresh public information is needed. Prefer the simplest reliable tool sequence. Never claim an action happened unless a tool actually completed it. Never fabricate analytics or live metrics. Never promise guaranteed followers, virality, watch time, sales or income. Save content only after the user explicitly asks to save it. External actions (publishing, sending messages, connecting accounts, financial/payment actions, or other irreversible actions) require explicit user confirmation immediately before execution; the current toolset intentionally does not execute them. Never expose secrets or ask the user to paste private API keys into chat. Use the user's language when practical. Return concise but useful, copy-ready results.`;
   const tools = [...CREATOR_AGENT_TOOLS, { type: "web_search" }] as any;
@@ -77,7 +82,7 @@ export async function runCreatorAgent(input: string, ctx: AgentToolContext) {
   const maxTurns = 8;
   for (let turn = 0; turn < maxTurns; turn += 1) {
     const calls = (response.output ?? []).filter((item: any) => item?.type === "function_call") as any[];
-    if (!calls.length) return { output: response.output_text?.trim() || "I completed the request, but there was no text response.", model };
+    if (!calls.length) return { output: response.output_text?.trim() || "I completed the request, but there was no text response.", model, provider };
     const toolOutputs: any[] = [];
     for (const call of calls) {
       let result: unknown;
@@ -90,10 +95,10 @@ export async function runCreatorAgent(input: string, ctx: AgentToolContext) {
   return { output: response.output_text?.trim() || "The agent reached its safe execution limit. Please continue with the next step.", model };
 }
 
-export async function runAgentForUser(input: string, userId: string) {
+export async function runAgentForUser(input: string, userId: string, preferredProvider?: AIProviderId | string) {
   const admin = createAdminClient();
   const { data: credits, error } = await admin.rpc("consume_credit", { p_user_id: userId });
   if (error) throw new Error(error.message || "Could not reserve a credit.");
-  try { const result = await runCreatorAgent(input, { userId }); return { ...result, credits }; }
+  try { const result = await runCreatorAgent(input, { userId }, preferredProvider); return { ...result, credits }; }
   catch (error) { try { await admin.rpc("refund_credit", { p_user_id: userId }); } catch {} throw error; }
 }
