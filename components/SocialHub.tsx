@@ -25,9 +25,9 @@ export default function SocialHub(){
   const [preview,setPreview]=useState(false);
   const [caption,setCaption]=useState("Share one practical creator tip your audience can use today.");
   const [draftSaved,setDraftSaved]=useState(false);
-  const [drafts,setDrafts]=useState<{id:string,caption:string,channels:string[],createdAt:string}[]>([]);
+  const [drafts,setDrafts]=useState<{id:string,caption:string,channels:string[],createdAt:string,status:"draft"|"pending_approval"|"approved"|"scheduled"}[]>([]);
   const [draftsOpen,setDraftsOpen]=useState(false);
-  const saveDraft=function(){if(!caption.trim()||!selected.length)return;const d={id:crypto.randomUUID(),caption:caption.trim(),channels:selected,createdAt:new Date().toISOString()};setDrafts(function(v){return [d,...v].slice(0,20)});setDraftSaved(true);setTimeout(function(){setDraftSaved(false)},1600)};
+  const saveDraft=function(){if(!caption.trim()||!selected.length)return;const d={id:crypto.randomUUID(),caption:caption.trim(),channels:selected,createdAt:new Date().toISOString(),status:"draft" as const};setDrafts(function(v){return [d,...v].slice(0,20)});setDraftSaved(true);setTimeout(function(){setDraftSaved(false)},1600)};
   const groups=["All"].concat(featureGroups.map(function(g){return g.name;}));
   const visible=useMemo(function(){
     return featureGroups.map(function(g){
@@ -35,7 +35,8 @@ export default function SocialHub(){
     }).filter(function(g){return (active==="All" || g.name===active) && g.features.length;});
   },[active,query]);
   const toggle=function(c:string){setSelected(function(s){return s.includes(c)?s.filter(function(x){return x!==c;}):s.concat(c);});};
-  useEffect(function(){try{const raw=localStorage.getItem("createsoul-social-drafts");if(raw)setDrafts(JSON.parse(raw));}catch{}},[]);
+  const setDraftStatus=function(id:string,status:"draft"|"pending_approval"|"approved"|"scheduled"){setDrafts(function(items){return items.map(function(d){return d.id===id?{...d,status}:d;});});};
+  useEffect(function(){try{const raw=localStorage.getItem("createsoul-social-drafts");if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed))setDrafts(parsed.map(function(d){return {...d,status:d?.status||"draft"};}));}}catch{}},[]);
   useEffect(function(){try{localStorage.setItem("createsoul-social-drafts",JSON.stringify(drafts));}catch{}},[drafts]);
 
   return <div className="cf-card cf-generator">
@@ -60,7 +61,7 @@ export default function SocialHub(){
         <button className="cf-button" type="button" onClick={saveDraft}>{draftSaved?"Draft saved ✓":"Save draft"}</button>
         <button className="cf-button" type="button" onClick={function(){setDraftsOpen(function(v){return !v;});}}>{draftsOpen?"Hide drafts":"Draft queue"}</button>
       </div>
-      {draftsOpen&&<div style={{display:"grid",gap:8,marginTop:10}}>{drafts.length===0?<div className="cf-muted">No local drafts yet.</div>:drafts.map(function(d){return <div key={d.id} style={{padding:10,borderRadius:10,border:"1px solid rgba(255,255,255,.1)"}}><div style={{fontSize:12}}>{d.caption}</div><div className="cf-muted" style={{fontSize:11,marginTop:5}}>{d.channels.join(" · ")} · draft only</div></div>})}</div>}
+      {draftsOpen&&<div style={{display:"grid",gap:8,marginTop:10}}>{drafts.length===0?<div className="cf-muted">No local drafts yet.</div>:drafts.map(function(d){return <div key={d.id} style={{padding:10,borderRadius:10,border:"1px solid rgba(255,255,255,.1)"}}><div style={{fontSize:12}}>{d.caption}</div><div className="cf-muted" style={{fontSize:11,marginTop:5}}>{d.channels.join(" · ")} · {d.status}</div><div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:7}}>{d.status==="draft"&&<button className="cf-icon-btn" onClick={function(){setDraftStatus(d.id,"pending_approval");}}>Send for approval</button>}{d.status==="pending_approval"&&<button className="cf-icon-btn" onClick={function(){setDraftStatus(d.id,"approved");}}>Approve</button>}{d.status==="approved"&&<button className="cf-icon-btn" onClick={function(){setDraftStatus(d.id,"scheduled");}}>Mark scheduled</button>}</div></div>})}</div>}
     </div>
     {preview&&<div style={{padding:15,borderRadius:14,border:"1px solid rgba(139,124,255,.35)",background:"rgba(139,124,255,.08)",marginBottom:16}}>
       <b>Unified workflow preview</b>
