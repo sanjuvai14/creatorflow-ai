@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const featureGroups = [
   { id:"publishing", name:"Publishing", icon:"◈", features:["Multi-channel composer","Cross-posting","Per-channel previews","Drafts","Queue","Scheduled publishing","Post delays","Recurring / evergreen posts","Scheduled comments & replies","Threads","Posting sets","Post signatures"] },
