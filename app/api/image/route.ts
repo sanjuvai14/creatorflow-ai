@@ -24,6 +24,9 @@ async function refundCredit(userId: string) {
 }
 
 export async function POST(req: Request) {
+  if (process.env.IMAGE_GENERATION_ENABLED !== "true") {
+    return NextResponse.json({ imageUrl: null, credits: null, error: "Image generation is disabled until it is explicitly enabled and configured.", code: "AI_IMAGE_GENERATION_DISABLED" }, { status: 503 });
+  }
   try {
     const raw = await req.text();
     if (new TextEncoder().encode(raw).byteLength > MAX_BODY_BYTES) {
@@ -98,7 +101,7 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ imageUrl, revisedPrompt: image?.revised_prompt || fullPrompt, credits });
     } catch (error) {
-      console.error("CreatorFlow image generation failed", {
+      console.error("CreateSoul image generation failed", {
         model,
         error: error instanceof Error ? error.message : String(error)
       });
@@ -109,7 +112,7 @@ export async function POST(req: Request) {
       }, { status: 502 });
     }
   } catch (error) {
-    console.error("CreatorFlow image route failed", error);
+    console.error("CreateSoul image route failed", error);
     return NextResponse.json({ error: "Image generation failed. Check your server configuration." }, { status: 500 });
   }
 }
