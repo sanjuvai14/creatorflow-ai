@@ -37,7 +37,7 @@ export default function VisualCreator(){
 
   async function generate(){
     if(!prompt.trim()){
-      setMessage("Tell CreatorFlow what you want to create first.");
+      setMessage("Tell CreateSoul AI what you want to create first.");
       return;
     }
     setLoading(true); setImage(null); setMessage("");
@@ -45,8 +45,8 @@ export default function VisualCreator(){
       const r=await fetch("/api/image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type:selected.label,style,prompt,text,aspectRatio:selected.ratio})});
       const d=await r.json();
       if(d.imageUrl) setImage(d.imageUrl);
-      else setMessage(d.error||"CreatorFlow could not create the visual. Please try again.");
-    }catch{setMessage("CreatorFlow could not reach the image service. Please try again.");}
+      else setMessage(d.error||"CreateSoul AI could not create the visual. Please try again.");
+    }catch{setMessage("CreateSoul AI could not reach the image service. Please try again.");}
     finally{setLoading(false);}
   }
 
@@ -55,24 +55,24 @@ export default function VisualCreator(){
     setSaving(true);setMessage("");
     try{
       const r=await fetch("/api/images/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({imageUrl:image,title:text||selected.label,imageType:type,prompt})});
-      const d=await r.json();setMessage(r.ok?"Saved to your CreatorFlow workspace.":d.error||"Could not save image.");
+      const d=await r.json();setMessage(r.ok?"Saved to your CreateSoul AI workspace.":d.error||"Could not save image.");
     }catch{setMessage("Could not save image. Please try again.");}
     finally{setSaving(false);}
   }
 
   return <div className="cf-card cf-visual">
     <div className="cf-visual-head">
-      <div><div className="cf-eyebrow">AI VISUAL STUDIO</div><h2>What do you want to create?</h2><p>Just tell CreatorFlow your idea. You don't need to understand design settings.</p></div>
+      <div><div className="cf-eyebrow">AI VISUAL STUDIO</div><h2>What do you want to create?</h2><p>Just tell CreateSoul AI your idea. You don't need to understand design settings.</p></div>
       <span className="cf-live">● AI READY</span>
     </div>
 
     <div className="cf-ai-request">
-      <div className="cf-ai-label"><span>✦</span> Ask CreatorFlow</div>
+      <div className="cf-ai-label"><span>✦</span> Ask CreateSoul AI</div>
       <div className="cf-ai-input-row">
         <textarea value={prompt} onChange={e=>setPrompt(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();generate();}}} placeholder="Example: Create a YouTube banner for my gaming channel with a bold, professional look..." />
         <button className="cf-btn cf-generate" onClick={generate} disabled={loading}>{loading?"Creating…":"Create ✦"}</button>
       </div>
-      <div className="cf-ai-sub">You can write naturally — CreatorFlow will handle the technical settings for you.</div>
+      <div className="cf-ai-sub">You can write naturally — CreateSoul AI will handle the technical settings for you.</div>
     </div>
 
     <div className="cf-quick-title">Or choose what you need</div>
