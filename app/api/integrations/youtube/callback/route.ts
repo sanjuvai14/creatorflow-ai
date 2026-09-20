@@ -72,6 +72,7 @@ export async function GET(request: Request) {
 
   if (error) return fail("connection_save_failed");
   const response = NextResponse.redirect(new URL("/settings?integration=youtube&connected=1", request.url));
+  response.headers.set("Cache-Control", "no-store");
   response.cookies.set("createsoul_oauth_state", "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 0, path: "/" });
   return response;
 }
