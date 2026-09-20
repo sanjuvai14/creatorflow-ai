@@ -34,6 +34,7 @@ export async function GET(request: Request) {
   }).toString();
 
   const response = NextResponse.redirect(authUrl);
+  response.headers.set("Cache-Control", "no-store");
   response.cookies.set("createsoul_oauth_state", state, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
