@@ -25,7 +25,7 @@ jobs:
 
       - name: Create lockfile when missing
         if: ${{ !hashFiles('package-lock.json') }}
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund --fetch-timeout=30000 --fetch-retries=1
 
       - name: Commit generated lockfile
         if: ${{ !hashFiles('package-lock.json') }}
@@ -37,7 +37,7 @@ jobs:
           git push
 
       - name: Install dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
 
       - name: Typecheck
         run: npm run typecheck
