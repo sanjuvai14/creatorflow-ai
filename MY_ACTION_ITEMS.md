@@ -1,30 +1,32 @@
-# CreateSoul AI — আপনার কাজ
+# CreateSoul AI — Launch checklist
 
-শুধু যেগুলো সত্যিই আপনার হাতে করতে হবে সেগুলো এখানে থাকবে। বাকি technical কাজ আমি এগিয়ে নেব।
+Last verified: 2026-09-21
 
-## আপনার হাতে
-- [ ] Vercel/Supabase-এ required secret/API key নিজে দেওয়া — secret এখানে চ্যাটে পাঠাবেন না।
-- [ ] Paid service/API চালু করার অনুমতি — কোনো খরচ হলে আগে জানানো হবে।
-- [ ] নিজের social accounts (YouTube/Instagram/Facebook/TikTok/LinkedIn/Shopify ইত্যাদি) OAuth authorization দেওয়া, যখন live publishing চালু করা হবে।
-- [ ] Payment merchant/account ownership বা identity verification, যদি provider আপনার উপস্থিতি চায়।
-
-## AI/technical work
+## Verified technical status
 - [x] App code, UI, AI workspace, voice system, generation flow
-- [x] Authentication, API protection, credits safeguards ও database/RLS safeguards
-- [x] CI build-verification workflow added
-- [ ] Production typecheck/build verification
-- [ ] Vercel production deployment verification — বর্তমানে Vercel team authorization blocker আছে
+- [x] Authentication, API protection, credits safeguards and database/RLS safeguards
+- [x] CI build-verification workflow present
+- [x] Vercel Git-connected production deployment verified READY
+- [x] Production homepage verified HTTP 200
+- [x] Production runtime errors checked for the last 24h — none found
+- [x] Latest production deployment uses main commit 41d880047d7f3e39dcbaaa73feab99c5b375ab84
+- [x] Latest production fix: removed invalid duplicate comma in tool category configuration
+
+## Remaining technical verification
+- [ ] Live authenticated AI endpoint smoke test with a real user session
+- [ ] Live image-generation smoke test with an enabled image provider
+- [ ] Payment provider integration and sandbox end-to-end test
+- [ ] Social OAuth connection and publishing smoke tests
+- [ ] Android/Capacitor build and APK artifact verification
 - [ ] Reproducible dependency lockfile verification
-- [ ] Live AI endpoint smoke test
-- [ ] Payment integration/provider technical implementation
-- [ ] Social platform OAuth/connection implementation and automated smoke tests
-- [ ] Android/Capacitor build verification and APK artifact verification
-- [ ] Real-user acceptance test flow
+- [ ] Final real-user acceptance test
 
-## নিরাপত্তা
-- কোনো password, secret, private token বা API key এই ফাইলে রাখা যাবে না।
-- Payment এবং external publishing production mode-এ কেবল verified credentials/configuration থাকলে চালু হবে।
-- কোনো paid service/API নিজে থেকে সক্রিয় করা হবে না।
+## User/provider prerequisites
+- [ ] Keep required API/provider secrets configured in Vercel/Supabase; never place secrets in source files.
+- [ ] Enable/approve paid AI or image services only when the owner authorizes the cost.
+- [ ] Complete payment merchant ownership/identity verification when required by the provider.
+- [ ] Authorize the owner's YouTube/Instagram/Facebook/TikTok/LinkedIn/Shopify accounts before live publishing.
+- [ ] Provide/approve payment provider credentials before real-money checkout is enabled.
 
-## Status rule
-কোনো build, deployment, OAuth, payment বা API integration সত্যি পরীক্ষা/সফলভাবে যাচাই না হওয়া পর্যন্ত সেটিকে "complete" বলা হবে না।
+## Launch rule
+Payment and external publishing remain disabled until credentials, signatures/webhooks, authorization and end-to-end tests are verified. No item is marked complete merely because code exists.
