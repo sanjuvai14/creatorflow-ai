@@ -1,4 +1,12 @@
 export type AIProviderName = "openai" | "gemini" | "anthropic" | "grok";
+
+// Safe defaults mirror .env.example. Explicit env values still override these defaults.
+const DEFAULT_MODELS: Record<AIProviderName, string> = {
+  openai: "gpt-5-mini",
+  gemini: "",
+  anthropic: "",
+  grok: "",
+};
 export type AIProviderId = AIProviderName | "auto";
 
 export type ProviderConfig = {
@@ -11,7 +19,7 @@ export type ProviderConfig = {
 /** Universal provider registry. Credentials remain server-side. A provider is only considered configured when both its credential and explicit model are present. */
 export function getProviderConfigs(): ProviderConfig[] {
   return [
-    { name: "openai", label: "OpenAI", configured: Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_TEXT_MODEL), model: process.env.OPENAI_TEXT_MODEL || "" },
+    { name: "openai", label: "OpenAI", configured: Boolean(process.env.OPENAI_API_KEY && (process.env.OPENAI_TEXT_MODEL || DEFAULT_MODELS.openai)), model: process.env.OPENAI_TEXT_MODEL || DEFAULT_MODELS.openai },
     { name: "gemini", label: "Google Gemini", configured: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_TEXT_MODEL), model: process.env.GEMINI_TEXT_MODEL || "" },
     { name: "anthropic", label: "Anthropic Claude", configured: Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_TEXT_MODEL), model: process.env.ANTHROPIC_TEXT_MODEL || "" },
     { name: "grok", label: "xAI Grok", configured: Boolean(process.env.XAI_API_KEY && process.env.XAI_TEXT_MODEL), model: process.env.XAI_TEXT_MODEL || "" },
