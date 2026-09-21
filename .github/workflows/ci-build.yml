@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify:
@@ -23,8 +23,21 @@ jobs:
         with:
           node-version: 20
 
+      - name: Create lockfile when missing
+        if: ${{ !hashFiles('package-lock.json') }}
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Commit generated lockfile
+        if: ${{ !hashFiles('package-lock.json') }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git diff --cached --quiet || git commit -m "build: add npm lockfile for reproducible installs"
+          git push
+
       - name: Install dependencies
-        run: npm install
+        run: npm install --ignore-scripts --no-audit --no-fund
 
       - name: Typecheck
         run: npm run typecheck
