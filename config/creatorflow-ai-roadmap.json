@@ -1,7 +1,7 @@
 {
-  "brand": "CreatorFlow AI",
+  "brand": "CreateSoul AI",
   "strategy": "platform_agnostic_creator_ai",
-  "lastReviewed": "2026-09-14",
+  "lastReviewed": "2026-09-21",
   "principles": [
     "Add standards and public/free capabilities when practical.",
     "Keep paid providers disabled until credentials, pricing, limits, and user approval are available.",
@@ -13,7 +13,7 @@
       "id": "ai-model-router",
       "name": "Multi-model AI Router",
       "status": "foundation",
-      "description": "Provider-neutral routing layer so CreatorFlow can add Gemini, OpenAI and future models without redesigning the app."
+      "description": "Provider-neutral routing layer so CreateSoul can add Gemini, OpenAI and future models without redesigning the app."
     },
     {
       "id": "creator-workspace",
