@@ -23,9 +23,21 @@ jobs:
         with:
           node-version: 20
           package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      - name: Configure npm
+        run: |
+          npm config set registry https://registry.npmjs.org
+          npm config set audit false
+          npm config set fund false
+          npm config set ignore-scripts true
+          npm config set fetch-retries 2
+          npm config set fetch-retry-mintimeout 10000
+          npm config set fetch-retry-maxtimeout 60000
+          npm config set fetch-timeout 120000
 
       - name: Install dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund --fetch-timeout=30000 --fetch-retries=1
+        run: npm install --omit=optional --ignore-scripts --no-audit --no-fund --prefer-online
 
       - name: Typecheck
         run: npm run typecheck
