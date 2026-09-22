@@ -1,6 +1,4 @@
-import type { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
+const config = {
   appId: 'ai.createsoul.app',
   appName: 'CreateSoul AI',
   webDir: 'out',
