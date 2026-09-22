@@ -1,4 +1,5 @@
 import Link from "next/link";
+import GrowthWorkspaceStats from "@/components/GrowthWorkspaceStats";
 
 const metrics = [
   ["New followers", "Example: +184", "Example: +18.4%"],
@@ -80,6 +81,8 @@ export default function GrowthPage() {
             </div>
           ))}
         </div>
+
+        <GrowthWorkspaceStats />
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.5fr) minmax(280px,1fr)", gap: 18, marginTop: 18 }}>
           <div className="cf-card" style={{ padding: 24 }}>
