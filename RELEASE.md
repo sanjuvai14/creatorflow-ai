@@ -1,6 +1,8 @@
 # CreateSoul AI — Final Release
 
 ## Verification
+
+Final release verification trigger: 2026-09-22
 - TypeScript typecheck: passed in GitHub Actions on the final release commit.
 - Next.js production build: passed in GitHub Actions on the final release commit.
 - Vercel production deployment: verified by Vercel deployment state.
