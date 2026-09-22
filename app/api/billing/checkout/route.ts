@@ -42,7 +42,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const paddleResponse = await fetch("https://api.paddle.com/transactions", {
+    const paddleBaseUrl = process.env.PADDLE_ENVIRONMENT === "production" ? "https://api.paddle.com" : "https://sandbox-api.paddle.com";
+    const paddleResponse = await fetch(`${paddleBaseUrl}/transactions`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
