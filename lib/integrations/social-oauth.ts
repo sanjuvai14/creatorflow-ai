@@ -58,7 +58,10 @@ function makeState(userId: string, platform: Platform, secret: string) {
 
 function parseState(state: string, secret: string) {
   const [payload, signature] = state.split(".");
-  if (!payload || !signature || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(sign(payload, secret)))) return null;
+  if (!payload || !signature) return null;
+  const expected = sign(payload, secret);
+  const actualBytes = Buffer.from(signature), expectedBytes = Buffer.from(expected);
+  if (actualBytes.length !== expectedBytes.length || !crypto.timingSafeEqual(actualBytes, expectedBytes)) return null;
   try {
     const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {userId?:string;platform?:Platform;issuedAt?:number};
     if (!parsed.userId || !parsed.platform || !parsed.issuedAt || Date.now() - parsed.issuedAt > maxAgeMs) return null;
