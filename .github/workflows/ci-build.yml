@@ -13,7 +13,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,22 +25,20 @@ jobs:
           package-manager-cache: false
           registry-url: https://registry.npmjs.org
 
-      - name: Configure npm
+      - name: Enable pnpm
+        run: corepack enable && corepack prepare pnpm@10.12.4 --activate
+
+      - name: Configure pnpm
         run: |
-          npm config set registry https://registry.npmjs.org
-          npm config set audit false
-          npm config set fund false
-          npm config set ignore-scripts true
-          npm config set fetch-retries 2
-          npm config set fetch-retry-mintimeout 10000
-          npm config set fetch-retry-maxtimeout 60000
-          npm config set fetch-timeout 120000
+          pnpm config set registry https://registry.npmjs.org
+          pnpm config set fetch-retries 2
+          pnpm config set fetch-timeout 120000
 
       - name: Install dependencies
-        run: npm install --omit=optional --ignore-scripts --no-audit --no-fund --prefer-online
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Production build
-        run: npm run build
+        run: pnpm run build
