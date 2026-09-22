@@ -42,3 +42,16 @@ jobs:
 
       - name: Production build
         run: pnpm run build
+
+      - name: Package final release
+        run: |
+          rm -rf .release-package
+          mkdir .release-package
+          tar --exclude=.git --exclude=node_modules --exclude=.next --exclude=.release-package -czf .release-package/CreateSoul-AI-final-release.tar.gz .
+      
+      - name: Upload final release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: CreateSoul-AI-final-release
+          path: .release-package/CreateSoul-AI-final-release.tar.gz
+          if-no-files-found: error
