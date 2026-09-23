@@ -4,6 +4,19 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const WAKE_WORDS = ["hey createsoul", "createsoul"];
 
+function detectSpeechLocale(text?: string) {
+  const value = text || "";
+  if (/[ঀ-৿]/.test(value)) return "bn-BD";
+  if (/[ऀ-ॿ]/.test(value)) return "hi-IN";
+  if (typeof navigator !== "undefined") {
+    const locale = navigator.language || "en-US";
+    if (/^bn/i.test(locale)) return "bn-BD";
+    if (/^hi/i.test(locale)) return "hi-IN";
+    return locale;
+  }
+  return "en-US";
+}
+
 function getSpeechRecognition() {
   if (typeof window === "undefined") return null;
   const w = window as any;
@@ -25,7 +38,7 @@ export default function VoiceAssistant() {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
+    utterance.lang = detectSpeechLocale(text);
     utterance.rate = 1;
     utterance.pitch = 1;
     utterance.onstart = () => setSpeaking(true);
@@ -45,7 +58,7 @@ export default function VoiceAssistant() {
         body: JSON.stringify({
           tool: "youtube",
           platform: "",
-          language: /বাংলা|bangla|bengali/i.test(text) ? "বাংলা" : "English",
+          language: /বাংলা|bangla|bengali/i.test(text) ? "বাংলা" : /हिन्दी|हिंदी|hindi/i.test(text) ? "Hindi" : "English",
           topic: text,
           tone: "Engaging",
           provider: "auto"
@@ -89,7 +102,7 @@ export default function VoiceAssistant() {
     }
     if (recognitionRef.current) recognitionRef.current.stop();
     const recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
+    recognition.lang = typeof navigator !== "undefined" ? (navigator.language || "en-US") : "en-US";
     recognition.interimResults = false;
     recognition.continuous = false;
     recognition.onstart = () => { setListening(true); setStatus("Listening…"); };
@@ -132,7 +145,7 @@ export default function VoiceAssistant() {
       <section className="cf-card" style={{ width: "min(900px,100%)", padding: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
           <div>
-            <div className="cf-eyebrow">CREATORFLOW AI · VOICE AGENT</div>
+            <div className="cf-eyebrow">CREATESOUL AI · VOICE AGENT</div>
             <h1 style={{ margin: "8px 0", fontSize: "clamp(30px,6vw,52px)" }}>Talk. Ask. Create.</h1>
             <p className="cf-muted" style={{ maxWidth: 650, lineHeight: 1.7 }}>
               A hands-free creator assistant. Say “Hey CreateSoul” followed by a task, or enable hands-free mode for a continuous voice conversation.
@@ -155,7 +168,7 @@ export default function VoiceAssistant() {
         </div>
 
         {heard && <div className="cf-card" style={{ marginTop: 14, padding: 16 }}><div className="cf-eyebrow">YOU SAID</div><div style={{ marginTop: 7, whiteSpace: "pre-wrap", lineHeight: 1.65 }}>{heard}</div></div>}
-        {reply && <div className="cf-card" style={{ marginTop: 14, padding: 16 }}><div className="cf-eyebrow">CREATORFLOW AI</div><div style={{ marginTop: 7, whiteSpace: "pre-wrap", lineHeight: 1.65 }}>{reply}</div></div>}
+        {reply && <div className="cf-card" style={{ marginTop: 14, padding: 16 }}><div className="cf-eyebrow">CREATESOUL AI</div><div style={{ marginTop: 7, whiteSpace: "pre-wrap", lineHeight: 1.65 }}>{reply}</div></div>}
 
         <div style={{ marginTop: 22, color: "#8e99aa", fontSize: 12, lineHeight: 1.7 }}>
           Voice control is browser-based and only listens while this page is active. Actual AI generation uses the same protected CreateSoul generation route and therefore will not consume credits when no AI provider is configured.
