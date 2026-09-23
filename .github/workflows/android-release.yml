@@ -1,0 +1,67 @@
+name: Build CreateSoul AI Android Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "capacitor.config.ts"
+      - "package.json"
+      - ".github/workflows/android-release.yml"
+      - "app/**"
+      - "components/**"
+      - "lib/**"
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Prepare Capacitor web directory
+        run: |
+          mkdir -p out
+          printf '%s\n' '<!doctype html><html><head><meta charset="utf-8"><title>CreateSoul AI</title></head><body></body></html>' > out/index.html
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build unsigned release APK and AAB
+        working-directory: android
+        run: ./gradlew assembleRelease bundleRelease --no-daemon
+
+      - name: Upload unsigned release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CreateSoul-AI-Android-release-unsigned
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Release signing status
+        run: |
+          echo "Unsigned release artifacts are built."
+          echo "A distributable signed release still requires an owner-controlled Android keystore and signing secrets."
