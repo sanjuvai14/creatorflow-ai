@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const WAKE_WORDS = ["hey creatorflow", "creatorflow"];
+const WAKE_WORDS = ["hey createsoul", "createsoul"];
 
 function getSpeechRecognition() {
   if (typeof window === "undefined") return null;
@@ -57,7 +57,7 @@ export default function VoiceAssistant() {
       setStatus(response.ok ? "Task complete" : "Needs AI connection");
       speak(output);
     } catch {
-      const message = "I couldn't reach the CreatorFlow AI service right now.";
+      const message = "I couldn't reach the CreateSoul AI service right now.";
       setReply(message);
       setStatus("Connection problem");
       speak(message);
@@ -73,11 +73,11 @@ export default function VoiceAssistant() {
     const lower = clean.toLowerCase();
     const hasWake = WAKE_WORDS.some(word => lower.includes(word));
     if (continuous || hasWake) {
-      const task = hasWake ? clean.replace(/^(hey\s+creatorflow|creatorflow)[:,\s-]*/i, "") : clean;
+      const task = hasWake ? clean.replace(/^(hey\s+createsoul|createsoul)[:,\s-]*/i, "") : clean;
       if (task.trim()) void runTask(task.trim());
       else setStatus("Listening for your task…");
     } else {
-      setStatus("Say “Hey CreatorFlow” or turn on hands-free mode");
+      setStatus("Say “Hey CreateSoul” or turn on hands-free mode");
     }
   }, [continuous, runTask]);
 
@@ -135,7 +135,7 @@ export default function VoiceAssistant() {
             <div className="cf-eyebrow">CREATORFLOW AI · VOICE AGENT</div>
             <h1 style={{ margin: "8px 0", fontSize: "clamp(30px,6vw,52px)" }}>Talk. Ask. Create.</h1>
             <p className="cf-muted" style={{ maxWidth: 650, lineHeight: 1.7 }}>
-              A hands-free creator assistant. Say “Hey CreatorFlow” followed by a task, or enable hands-free mode for a continuous voice conversation.
+              A hands-free creator assistant. Say “Hey CreateSoul” followed by a task, or enable hands-free mode for a continuous voice conversation.
             </p>
           </div>
           <div style={{ width: 120, height: 120, borderRadius: "50%", display: "grid", placeItems: "center", background: speaking ? "rgba(34,211,238,.16)" : listening ? "rgba(124,92,255,.2)" : "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)", fontSize: 42 }}>
@@ -158,7 +158,7 @@ export default function VoiceAssistant() {
         {reply && <div className="cf-card" style={{ marginTop: 14, padding: 16 }}><div className="cf-eyebrow">CREATORFLOW AI</div><div style={{ marginTop: 7, whiteSpace: "pre-wrap", lineHeight: 1.65 }}>{reply}</div></div>}
 
         <div style={{ marginTop: 22, color: "#8e99aa", fontSize: 12, lineHeight: 1.7 }}>
-          Voice control is browser-based and only listens while this page is active. Actual AI generation uses the same protected CreatorFlow generation route and therefore will not consume credits when no AI provider is configured.
+          Voice control is browser-based and only listens while this page is active. Actual AI generation uses the same protected CreateSoul generation route and therefore will not consume credits when no AI provider is configured.
         </div>
       </section>
     </main>
