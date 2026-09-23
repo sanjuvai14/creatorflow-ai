@@ -37,8 +37,13 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
 
+    // Conversation history is user-owned data. Use the service-role client after
+    // authenticating the user so a stale/invalid RLS session cannot turn a valid
+    // chat request into "Could not verify conversation". Every query remains
+    // explicitly scoped to the authenticated user's id.
     const { createAdminClient } = await import("@/lib/supabase/admin");
     const admin = createAdminClient();
+
     const { data: allowed, error: rateError } = await admin.rpc("check_generation_rate_limit", {
       p_user_id: user.id,
       p_limit: RATE_LIMIT,
@@ -49,7 +54,7 @@ export async function POST(req: Request) {
 
     let activeConversationId = conversationId;
     if (activeConversationId) {
-      const { data: owned, error: lookupError } = await supabase
+      const { data: owned, error: lookupError } = await admin
         .from("agent_conversations")
         .select("id,title")
         .eq("id", activeConversationId)
@@ -58,8 +63,9 @@ export async function POST(req: Request) {
       if (lookupError) return NextResponse.json({ error: "Could not verify conversation." }, { status: 503 });
       if (!owned) activeConversationId = "";
     }
+
     if (!activeConversationId) {
-      const { data: created, error: createError } = await supabase
+      const { data: created, error: createError } = await admin
         .from("agent_conversations")
         .insert({ user_id: user.id, title: message.slice(0, 55) || "New conversation" })
         .select("id")
@@ -68,7 +74,7 @@ export async function POST(req: Request) {
       activeConversationId = created.id;
     }
 
-    const { data: history, error: historyError } = await supabase
+    const { data: history, error: historyError } = await admin
       .from("agent_messages")
       .select("role,content,created_at")
       .eq("conversation_id", activeConversationId)
@@ -85,7 +91,7 @@ export async function POST(req: Request) {
       historyText += line + "\n";
     }
 
-    const { error: userMessageError } = await supabase.from("agent_messages").insert({
+    const { error: userMessageError } = await admin.from("agent_messages").insert({
       conversation_id: activeConversationId,
       user_id: user.id,
       role: "user",
@@ -97,13 +103,13 @@ export async function POST(req: Request) {
     const preferredProvider = provider.toLowerCase().replace(/\s+/g, "");
     const result = await runAgentForUser(`${workflowContext}\n\n${context}\nUser request:\n${message}`, user.id, preferredProvider === "autoai" ? "auto" : preferredProvider);
 
-    const { error: assistantMessageError } = await supabase.from("agent_messages").insert({
+    const { error: assistantMessageError } = await admin.from("agent_messages").insert({
       conversation_id: activeConversationId,
       user_id: user.id,
       role: "assistant",
       content: result.output || ""
     });
-    await supabase.from("agent_conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConversationId).eq("user_id", user.id);
+    await admin.from("agent_conversations").update({ updated_at: new Date().toISOString() }).eq("id", activeConversationId).eq("user_id", user.id);
 
     return NextResponse.json({ success: true, conversationId: activeConversationId, historySaved: !assistantMessageError, ...result });
   } catch (error) {
