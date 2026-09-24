@@ -44,6 +44,18 @@ export async function POST(req: Request) {
     const { createAdminClient } = await import("@/lib/supabase/admin");
     const admin = createAdminClient();
 
+    const { data: chatLimits, error: chatLimitError } = await admin.rpc("check_chat_limits", {
+      p_user_id: user.id,
+      p_hour_limit: 10,
+      p_day_limit: 30
+    });
+    if (chatLimitError) return NextResponse.json({ error: "Could not verify chat limits." }, { status: 503 });
+    if (!chatLimits?.allowed) {
+      return NextResponse.json({
+        error: "Free chat limit reached. You can use up to 10 chats per hour and 30 chats per 24 hours on the free plan.",
+        limits: chatLimits
+      }, { status: 429, headers: { "Retry-After": "3600" } });
+    }
     const { data: allowed, error: rateError } = await admin.rpc("check_generation_rate_limit", {
       p_user_id: user.id,
       p_limit: RATE_LIMIT,
