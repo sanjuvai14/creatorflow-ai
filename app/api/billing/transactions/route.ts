@@ -15,7 +15,9 @@ export async function GET() {
       .limit(50);
 
     if (error) return NextResponse.json({ error: "Could not load billing transactions." }, { status: 503 });
-    return NextResponse.json({ transactions: data ?? [], paymentsEnabled: false });
+
+    const paymentsEnabled = process.env.PADDLE_BILLING_ENABLED === "true";
+    return NextResponse.json({ transactions: data ?? [], paymentsEnabled });
   } catch {
     return NextResponse.json({ error: "Could not load billing transactions." }, { status: 500 });
   }
