@@ -38,9 +38,12 @@ function parseJsonMap(name: string): Record<string, number> {
 
 function planForPrice(priceId: string | undefined) {
   if (!priceId) return null;
-  if (priceId === process.env.PADDLE_CREATOR_PRICE_ID) return "creator";
-  if (priceId === process.env.PADDLE_PRO_PRICE_ID) return "pro";
-  return null;
+  const mappings: Array<[string | undefined, string]> = [
+    [process.env.PADDLE_STARTER_PRICE_ID, "starter"],
+    [process.env.PADDLE_CREATOR_PRICE_ID, "creator"],
+    [process.env.PADDLE_PRO_PRICE_ID, "pro"],
+  ];
+  return mappings.find(([configuredId]) => configuredId && configuredId === priceId)?.[1] || null;
 }
 
 function parseAmount(value: unknown) {
@@ -153,7 +156,7 @@ export async function POST(request: Request) {
       const status = typeof data.status === "string" ? data.status : "pending";
       const plan = status === "canceled" || status === "paused"
         ? "free"
-        : planForPrice(getPriceId(data)) || (typeof data.custom_data?.plan === "string" && ["creator", "pro"].includes(data.custom_data.plan) ? data.custom_data.plan : null);
+        : planForPrice(getPriceId(data)) || (typeof data.custom_data?.plan === "string" && ["starter", "creator", "pro"].includes(data.custom_data.plan) ? data.custom_data.plan : null);
 
       if (!plan) {
         return NextResponse.json({ error: "Subscription price is not server-configured." }, { status: 422 });
