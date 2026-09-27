@@ -1,14 +1,14 @@
 # CreateSoul AI — Billing & Deployment Handoff
-Last verified: 2026-09-27
+Last verified: 2026-09-27 18:00 UTC
 
 ## Project
 - GitHub: sanjuvai14/creatorflow-ai
 - Vercel project: creatorflow-ai
 - Vercel project ID: prj_XJK2osiiNSXw65MwFXLzDi89rLZf
 - Vercel team: sanjuvai14 (team_BhFuNJYuliRvrkZUuT4Dssoi)
-- Production deployment verified READY.
-- Latest production commit: 275b2467d654bcaec8009ab4bc1f046d21806618
-- Latest commit message: fix: report billing payment availability correctly
+- A production deployment was triggered automatically from the latest billing commits; final READY status must be rechecked after the build completes.
+- Latest GitHub commit: 5d268785f51932c82931fe41efcd49f7aceacca0
+- Latest commit message: chore: document expanded Paddle price configuration
 
 ## Paddle prices configured in Sandbox
 1. $4.99 one-time AI credit purchase — pri_01m3hrj4baqgr45r2pgg4jj2pv
@@ -68,15 +68,12 @@ Webhook implementation includes:
 - idempotency delegated to billing RPC/event IDs
 
 ## Important code/config mismatch to resolve before enabling real money
-The current application code still expects only:
-- PADDLE_CREATOR_PRICE_ID
-- PADDLE_PRO_PRICE_ID
-and the pricing UI currently displays $14.99 Creator and $29.99 Pro.
+The checkout and webhook code have now been expanded to support a Starter plan and a one-time credit purchase through server-side environment mappings. The environment template now documents PADDLE_STARTER_PRICE_ID and PADDLE_CREDIT_PRICE_ID in addition to the existing plan mappings.
 
-These do not match the six Paddle prices currently configured in Sandbox. Real billing must NOT be enabled until the app's plan catalog and Vercel environment variables are aligned with the intended six-price CreateSoul catalog.
+The pricing UI still needs to be aligned with the exact final six-price catalog, because the exact missing Starter annual price/ID and the final business naming of the $9.99/$99.99 pair have not been verified from Paddle. Real billing must NOT be enabled until the app's plan catalog and Vercel environment variables are aligned with the intended six-price CreateSoul catalog.
 
 ## Resume procedure
-1. Align application pricing and server-side price mapping with the six actual Paddle prices.
+1. Verify the exact six Paddle prices and align the pricing UI/server-side mappings with them.
 2. Ensure Vercel production environment variables contain the matching Paddle API key, webhook secret, billing-enabled flag, environment, subscription price IDs, and credit map.
 3. Deploy and verify production build.
 4. Run a Paddle Sandbox checkout using a configured subscription price.
@@ -89,3 +86,17 @@ These do not match the six Paddle prices currently configured in Sandbox. Real b
 
 ## Security
 Never store Paddle API keys or webhook secrets in this document, GitHub, or client-side code. They belong only in Vercel server-side environment variables/Paddle dashboard.
+
+
+## Changes made in this work session
+- Expanded app/api/billing/checkout/route.ts to accept starter, creator, pro, and credit purchases via server-side price environment variables.
+- Added purchase_type metadata so credit purchases are distinguishable from subscriptions.
+- Expanded app/api/billing/webhook/route.ts to recognize the Starter plan.
+- Expanded .env.example with PADDLE_STARTER_PRICE_ID and PADDLE_CREDIT_PRICE_ID.
+- GitHub commits created automatically from these changes: 8b3ddf8e4ba5259ce00013a9efbad0f972e3a04d, b784f9c99b6eb5987a36f36ea6cc35e5eb14718b, 5d268785f51932c82931fe41efcd49f7aceacca0.
+- Vercel automatically started production deployments for these commits; final build/READY verification remains required.
+
+## Hard blocker before final billing completion
+- The exact missing Starter annual price ID and the definitive mapping/name for the $9.99 monthly + $99.99 yearly pair are not available in the verified record. Do not guess these values.
+- Paddle simulation run/delivery is still unverified. Paddle documentation confirms a configured simulation must be explicitly run before delivery results exist. The simulation's last-run state must be verified.
+- Live Paddle billing has not been verified and must remain separate from Sandbox until Sandbox E2E succeeds.
