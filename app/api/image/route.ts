@@ -24,9 +24,6 @@ async function refundCredit(userId: string) {
 }
 
 export async function POST(req: Request) {
-  if (process.env.IMAGE_GENERATION_ENABLED !== "true") {
-    return NextResponse.json({ imageUrl: null, credits: null, error: "Image generation is disabled until it is explicitly enabled and configured.", code: "AI_IMAGE_GENERATION_DISABLED" }, { status: 503 });
-  }
   try {
     const raw = await req.text();
     if (new TextEncoder().encode(raw).byteLength > MAX_BODY_BYTES) {
@@ -53,7 +50,7 @@ export async function POST(req: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Please log in first." }, { status: 401 });
 
-    const model = process.env.OPENAI_IMAGE_MODEL?.trim();
+    const model = process.env.OPENAI_IMAGE_MODEL?.trim() || "gpt-image-2";
     if (!process.env.OPENAI_API_KEY || !model) {
       return NextResponse.json({
         imageUrl: null,
