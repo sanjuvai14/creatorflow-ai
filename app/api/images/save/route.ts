@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const MAX_REQUEST_BYTES = 64 * 1024;
+const MAX_REQUEST_BYTES = 14 * 1024 * 1024;
 
 function isAllowedImageHost(value: string) {
   try {
@@ -24,11 +24,12 @@ export async function POST(req: Request) {
 
     const body = await req.json().catch(() => ({}));
     const imageUrl = typeof body.imageUrl === "string" ? body.imageUrl.trim() : "";
+    const isDataImage = imageUrl.startsWith("data:image/");
     const title = typeof body.title === "string" ? body.title.trim().slice(0, 120) : "Generated visual";
     const imageType = typeof body.imageType === "string" ? body.imageType.trim().slice(0, 60) : "generated";
     const prompt = typeof body.prompt === "string" ? body.prompt.trim().slice(0, 2000) : null;
 
-    if (!imageUrl || imageUrl.length > 4096 || !isAllowedImageHost(imageUrl)) {
+    if (!imageUrl || (!isDataImage && (imageUrl.length > 4096 || !isAllowedImageHost(imageUrl)))) {
       return NextResponse.json({ error: "This image cannot be saved from that source." }, { status: 400 });
     }
 
@@ -38,26 +39,26 @@ export async function POST(req: Request) {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const imageResponse = await fetch(imageUrl, {
+    const imageResponse = isDataImage ? null : await fetch(imageUrl, {
       signal: AbortSignal.timeout(20000),
       redirect: "error",
     });
-    if (!imageResponse.ok) {
+    if (!isDataImage && !imageResponse?.ok) {
       return NextResponse.json({ error: "The generated image is no longer available. Please generate it again." }, { status: 502 });
     }
 
-    const responseLength = Number(imageResponse.headers.get("content-length") || "0");
+    const responseLength = isDataImage ? 0 : Number(imageResponse?.headers.get("content-length") || "0");
     if (responseLength > MAX_IMAGE_BYTES) {
       return NextResponse.json({ error: "Image is too large to save." }, { status: 413 });
     }
 
-    const contentType = imageResponse.headers.get("content-type")?.split(";")[0]?.toLowerCase() || "";
+    const contentType = isDataImage ? imageUrl.slice(5, imageUrl.indexOf(";")).toLowerCase() : imageResponse?.headers.get("content-type")?.split(";")[0]?.toLowerCase() || "";
     const allowedTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
     if (!allowedTypes.has(contentType)) {
       return NextResponse.json({ error: "Unsupported image format." }, { status: 400 });
     }
 
-    const imageBytes = await imageResponse.arrayBuffer();
+    const imageBytes = isDataImage ? Buffer.from(imageUrl.slice(imageUrl.indexOf(",")+1), "base64") : await imageResponse!.arrayBuffer();
     if (imageBytes.byteLength > MAX_IMAGE_BYTES) {
       return NextResponse.json({ error: "Image is too large to save." }, { status: 413 });
     }
