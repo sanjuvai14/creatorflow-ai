@@ -1,0 +1,35 @@
+name: CreateSoul AI Android Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - run: pnpm install --frozen-lockfile
+      - run: mkdir -p out && printf '<!doctype html><html><body></body></html>' > out/index.html
+      - run: npx cap add android
+      - run: npx cap sync android
+      - name: Set target API 36
+        run: |
+          if [ -f android/variables.gradle ]; then
+            sed -i -E 's/(compileSdkVersion[[:space:]]*=[[:space:]]*)[0-9]+/\136/g' android/variables.gradle
+            sed -i -E 's/(targetSdkVersion[[:space:]]*=[[:space:]]*)[0-9]+/\136/g' android/variables.gradle
+          fi
+      - working-directory: android
+        run: ./gradlew bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CreateSoul-AI-release
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
