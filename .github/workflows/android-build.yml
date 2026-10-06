@@ -13,6 +13,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.4
@@ -61,7 +65,7 @@ public class MainActivity extends BridgeActivity {
                             request.deny();
                             return;
                         }
-                        if ((request.getResources().length > 0) &&
+                        if (request.getResources().length > 0 &&
                             checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
                             request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
                             return;
@@ -91,16 +95,18 @@ public class MainActivity extends BridgeActivity {
 ''')
           PY
       - run: npx cap sync android
-      - name: Set target API 36
+      - name: Set Android 16 / API 36
         run: |
           if [ -f android/variables.gradle ]; then
             sed -i -E 's/(compileSdkVersion[[:space:]]*=[[:space:]]*)[0-9]+/\136/g' android/variables.gradle
             sed -i -E 's/(targetSdkVersion[[:space:]]*=[[:space:]]*)[0-9]+/\136/g' android/variables.gradle
           fi
+          grep -E 'compileSdkVersion|targetSdkVersion' android/variables.gradle
       - name: Build Android artifacts
         working-directory: android
         run: |
-          ./gradlew bundleRelease assembleDebug
+          ./gradlew --no-daemon clean
+          ./gradlew --no-daemon bundleRelease assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: CreateSoul-AI-android-build
