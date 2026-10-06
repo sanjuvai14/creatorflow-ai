@@ -19,6 +19,77 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: mkdir -p out && printf '<!doctype html><html><body></body></html>' > out/index.html
       - run: npx cap add android
+      - name: Configure Android voice permissions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          manifest=Path("android/app/src/main/AndroidManifest.xml")
+          s=manifest.read_text()
+          marker='<uses-permission android:name="android.permission.INTERNET" />'
+          if 'android.permission.RECORD_AUDIO' not in s:
+              s=s.replace(marker, marker+'\n    <uses-permission android:name="android.permission.RECORD_AUDIO" />')
+          manifest.write_text(s)
+          activity=Path("android/app/src/main/java/ai/createsoul/app/MainActivity.java")
+          activity.parent.mkdir(parents=True, exist_ok=True)
+          activity.write_text(r'''package ai.createsoul.app;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.webkit.PermissionRequest;
+import android.webkit.WebChromeClient;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {
+    private static final int AUDIO_PERMISSION_REQUEST = 9101;
+    private PermissionRequest pendingRequest;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().setWebChromeClient(new WebChromeClient() {
+                @Override
+                public void onPermissionRequest(final PermissionRequest request) {
+                    runOnUiThread(() -> {
+                        String host = request.getOrigin() == null ? "" : request.getOrigin().getHost();
+                        if (!"creatorflow-ai-sanjuvai14.vercel.app".equals(host) &&
+                            !"creatorflow-ai-psi.vercel.app".equals(host) &&
+                            !"creatorflow-ai-git-main-sanjuvai14.vercel.app".equals(host)) {
+                            request.deny();
+                            return;
+                        }
+                        if ((request.getResources().length > 0) &&
+                            checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                            request.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+                            return;
+                        }
+                        pendingRequest = request;
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.RECORD_AUDIO}, AUDIO_PERMISSION_REQUEST);
+                    });
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (requestCode == AUDIO_PERMISSION_REQUEST && pendingRequest != null) {
+            if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) {
+                pendingRequest.grant(new String[]{PermissionRequest.RESOURCE_AUDIO_CAPTURE});
+            } else {
+                pendingRequest.deny();
+            }
+            pendingRequest = null;
+        }
+    }
+}
+''')
+          PY
       - run: npx cap sync android
       - name: Set target API 36
         run: |
@@ -26,10 +97,14 @@ jobs:
             sed -i -E 's/(compileSdkVersion[[:space:]]*=[[:space:]]*)[0-9]+/\136/g' android/variables.gradle
             sed -i -E 's/(targetSdkVersion[[:space:]]*=[[:space:]]*)[0-9]+/\136/g' android/variables.gradle
           fi
-      - working-directory: android
-        run: ./gradlew bundleRelease
+      - name: Build Android artifacts
+        working-directory: android
+        run: |
+          ./gradlew bundleRelease assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: CreateSoul-AI-release
-          path: android/app/build/outputs/bundle/release/*.aab
+          name: CreateSoul-AI-android-build
+          path: |
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
