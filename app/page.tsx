@@ -1,87 +1,76 @@
 import Link from "next/link";
 
-const tools = [
-  ["✦", "YouTube Studio", "Titles, descriptions, tags and scripts", "/dashboard?tool=YouTube%20Studio&platform=youtube"],
-  ["◈", "Shorts & Reels", "Hooks, scripts and captions", "/dashboard?tool=Shorts%20%26%20Reels&platform=general"],
-  ["◉", "Social Posts", "Facebook, Instagram and TikTok", "/dashboard?tool=Social%20Posts&platform=general"],
-  ["◇", "Product Copy", "Conversion-focused product descriptions", "/dashboard?tool=Product%20Copy&platform=shopify"],
-  ["⬢", "Visual Creator", "Thumbnails, banners and creator visuals", "/images"],
-  ["↗", "Real Growth", "Audience discovery, trends and organic growth strategy", "/growth"],
+const quickActions = [
+  ["✦", "Ask anything", "Chat with CreateSoul AI", "/login"],
+  ["▧", "Create an image", "Generate visuals and thumbnails", "/images"],
+  ["⌕", "Research & write", "Turn ideas into ready-to-use content", "/login"],
+  ["◷", "Plan content", "Schedule and organize your workflow", "/login"],
 ];
 
 export default function Home() {
   return (
-    <main className="cs-home">
-      <div className="cs-orb cs-orb-one" />
-      <div className="cs-orb cs-orb-two" />
-
-      <nav className="cs-nav">
-        <Link href="/" className="cs-brand" aria-label="CreateSoul AI home">
-          <span className="cs-logo-mark"><span>✦</span></span>
-          <span>Create<span> Soul</span><small>AI</small></span>
+    <main className="cf-app-shell cs-landing-shell">
+      <aside className="cf-app-sidebar cs-landing-sidebar">
+        <Link href="/" className="cf-side-brand" aria-label="CreateSoul AI home">
+          <span>Create</span><strong>Soul</strong><em>AI</em>
         </Link>
-        <div className="cs-nav-actions">
-          <Link href="/growth" className="cf-icon-btn">Real Growth</Link>
-          <Link href="/pricing" className="cf-icon-btn">Pricing</Link>
-          <Link href="/login" className="cf-btn">Sign in</Link>
+        <div className="cf-side-nav">
+          <Link href="/login" className="primary-side"><span>＋</span>New chat</Link>
+          <Link href="/login"><span>⌕</span>Search</Link>
+          <Link href="/images"><span>▧</span>Images</Link>
+          <Link href="/saved"><span>▤</span>Library</Link>
+          <Link href="/pricing"><span>◇</span>Plans</Link>
+          <Link href="/platforms"><span>⊞</span>Apps</Link>
         </div>
-      </nav>
+        <div className="cf-side-section">
+          <div className="cf-side-label">CREATESOUL AI</div>
+          <div className="cf-empty-chats">Your private AI workspace for chat, creation, research and creator tools.</div>
+        </div>
+        <div className="cf-side-bottom">
+          <Link href="/support">◌ Support Center</Link>
+          <Link href="/settings">⚙ Settings</Link>
+        </div>
+      </aside>
 
-      <section className="cs-hero">
-        <div className="cs-hero-copy">
-          <div className="cf-eyebrow">THE AI CREATION SPACE</div>
-          <div className="cs-floating-badge">✦ Your ideas, amplified by AI</div>
-          <h1>Where <span>ideas</span><br />become real.</h1>
-          <p>Create, refine and bring your vision to life with one intelligent workspace for content, visuals, growth and creator workflows.</p>
-          <div className="cs-hero-actions">
-            <Link href="/login" className="cf-btn">Start Creating Free →</Link>
-            <Link href="/growth" className="cf-icon-btn">Explore the workspace</Link>
+      <section className="cf-app-main cs-landing-main">
+        <header className="cf-app-top cs-landing-top">
+          <div className="cf-mobile-title">CreateSoul AI</div>
+          <div className="cs-landing-actions">
+            <Link href="/pricing" className="cf-icon-btn">Pricing</Link>
+            <Link href="/login" className="cf-btn">Sign in</Link>
           </div>
-          <div className="cs-trust">Built for creators · Phone, tablet and PC · 10+ languages</div>
-        </div>
+        </header>
 
-        <div className="cs-hero-visual" aria-label="CreateSoul AI 3D concept">
-          <div className="cs-glass-stage">
-            <div className="cs-soul">
-              <div className="cs-soul-core">✦</div>
-              <div className="cs-ring cs-ring-a" />
-              <div className="cs-ring cs-ring-b" />
+        <div className="cs-landing-content">
+          <div className="cs-landing-badge">✦ CREATE · RESEARCH · GROW</div>
+          <h1>What can I help you with?</h1>
+          <p>Ask CreateSoul AI anything, create visuals, research ideas and turn your prompts into useful creator work.</p>
+
+          <div className="cs-quick-grid">
+            {quickActions.map(([icon, title, desc, href]) => (
+              <Link href={href} className="cf-card cs-quick-card" key={title}>
+                <span className="cs-quick-icon">{icon}</span>
+                <span><strong>{title}</strong><small>{desc}</small></span>
+                <b>↗</b>
+              </Link>
+            ))}
+          </div>
+
+          <div className="cs-landing-composer">
+            <div className="cs-composer-top">Ask CreateSoul AI</div>
+            <Link href="/login" className="cs-composer-input">
+              <span>Just ask CreateSoul anything…</span>
+              <b>↗</b>
+            </Link>
+            <div className="cs-composer-tools">
+              <span>✦ AI workspace</span>
+              <span>▧ Images</span>
+              <span>⌕ Research</span>
+              <span>◷ Planning</span>
             </div>
-            <div className="cs-stage-label">CREATE<br /><b>SOUL</b><small>AI</small></div>
-            <div className="cs-chip cs-chip-a">CREATE</div>
-            <div className="cs-chip cs-chip-b">INSPIRE</div>
-            <div className="cs-chip cs-chip-c">GROW</div>
           </div>
-        </div>
-      </section>
 
-      <section className="cs-tools">
-        <div className="cs-section-head">
-          <div>
-            <div className="cf-eyebrow">ONE SOUL. MANY CREATIONS.</div>
-            <h2>Everything your idea needs.</h2>
-          </div>
-          <p className="cf-muted">One premium workspace for turning a thought into something people can see, read and share.</p>
-        </div>
-        <div className="cs-tool-grid">
-          {tools.map(([icon, title, desc, href]) => (
-            <a href={href} className="cf-card cs-tool-card cf-glow" key={title} aria-label={"Open " + title}>
-              <div className="cs-tool-icon">{icon}</div>
-              <h3>{title}</h3>
-              <p className="cf-muted">{desc}</p>
-              <span className="cs-card-arrow">↗</span>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <section className="cs-final">
-        <div className="cf-card cs-final-card">
-          <div className="cs-mini-mark">✦</div>
-          <div className="cf-eyebrow">CREATE WITH PURPOSE</div>
-          <h2>Your idea deserves more than a blank page.</h2>
-          <p className="cf-muted">Bring your thoughts, prompts and plans into CreateSoul AI and turn them into ready-to-use creator work.</p>
-          <Link href="/login" className="cf-btn">Enter CreateSoul AI →</Link>
+          <div className="cs-landing-note">CreateSoul AI · Your ideas, amplified by AI</div>
         </div>
       </section>
     </main>
