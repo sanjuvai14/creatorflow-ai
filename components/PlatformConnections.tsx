@@ -82,16 +82,18 @@ export default function PlatformConnections(){
    <div className="cf-card" style={{padding:14,marginTop:14}}><strong>How the integration hub works</strong><p className="cf-muted" style={{fontSize:12,margin:"7px 0 0"}}>Enable only the services you want. Then connect that service and approve its own permissions. Disabling a service hides its action from this workspace; it does not revoke the provider account permission, so use Disconnect when you want to remove the stored connection.</p></div>
    <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:14,marginBottom:14}}>{groups.map(g=><button key={g} className={"cf-icon-btn "+(group===g?"active":"")} onClick={()=>setGroup(g)}>{g}</button>)}</div>
    {loading?<p className="cf-muted">Checking connections…</p>:<div style={{display:"grid",gap:10}}>{filtered.map(p=>{
-     const c=items.find(x=>x.platform===p.id&&x.status==="connected");
+     const accounts=items.filter(x=>x.platform===p.id&&x.status==="connected");
+     const c=accounts[0];
      const mode=modes[p.id]||"ask";
      const isEnabled=enabled[p.id] ?? p.available;
      return <article key={p.id} className="cf-card" style={{padding:14,opacity:isEnabled?1:.72}}>
        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,flexWrap:"wrap"}}>
          <div style={{display:"flex",gap:10,alignItems:"center"}}><span style={{fontSize:22,width:38,height:38,display:"grid",placeItems:"center",borderRadius:10,border:"1px solid rgba(255,255,255,.12)"}}>{p.icon}</span><div><strong>{p.name}</strong><div className="cf-muted" style={{fontSize:12,marginTop:3}}>{p.description}</div></div></div>
-         <span className="cf-live">{c?"● Connected":isEnabled&&p.available?"● Not connected":isEnabled?"● Enabled · setup required":"● Disabled"}</span>
+         <span className="cf-live">{accounts.length>0?"● "+accounts.length+" connected":isEnabled&&p.available?"● Not connected":isEnabled?"● Enabled · setup required":"● Disabled"}</span>
        </div>
        <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",marginTop:12}}>
-         {c?<button className="cf-icon-btn" disabled={busy===c.id} onClick={()=>disconnect(c.id)}>{busy===c.id?"Removing…":"Disconnect"}</button>:isEnabled&&p.available?<a className="cf-btn" href={p.connectPath}>Connect {p.name}</a>:isEnabled?<span className="cf-muted" style={{fontSize:12}}>Provider adapter not configured yet</span>:<span className="cf-muted" style={{fontSize:12}}>Enable this service to use it</span>}
+         {accounts.length>0&&<div style={{display:"grid",gap:7,width:"100%"}}>{accounts.map(a=><div key={a.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,padding:"7px 9px",border:"1px solid rgba(255,255,255,.08)",borderRadius:9}}><span><strong>{a.external_account_name||p.name+" account"}</strong><span className="cf-muted" style={{fontSize:11,marginLeft:7}}>{a.external_account_id||""}</span></span><button className="cf-icon-btn" disabled={busy===a.id} onClick={()=>disconnect(a.id)}>{busy===a.id?"Removing…":"Disconnect"}</button></div>)}</div>}
+         {isEnabled&&p.available?<a className="cf-btn" href={p.connectPath}>＋ Add {p.name} account</a>:isEnabled?<span className="cf-muted" style={{fontSize:12}}>Provider adapter not configured yet</span>:<span className="cf-muted" style={{fontSize:12}}>Enable this service to use it</span>}
          <button className="cf-icon-btn" onClick={()=>setEnabledFor(p.id,!isEnabled)}>{isEnabled?"Disable":"Enable"}</button>
          <label className="cf-muted" style={{fontSize:12,display:"flex",alignItems:"center",gap:7}}>CreateSoul access preference<select className="cf-input" style={{width:"auto",minWidth:150,padding:"7px 9px"}} value={mode} onChange={e=>setMode(p.id,e.target.value as AccessMode)}>{accessModes.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}</select></label>
        </div>
