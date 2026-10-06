@@ -141,7 +141,7 @@ export async function finishSocialOAuth(request: Request, platform: Platform) {
     token_type:token.token_type||"Bearer",
     expires_at:token.expires_in?new Date(Date.now()+token.expires_in*1000).toISOString():null,
     updated_at:new Date().toISOString(),
-  },{onConflict:"user_id,platform"});
+  },{onConflict:"user_id,platform,external_account_id"});
   if (error) return fail("connection_save_failed");
   const response = NextResponse.redirect(new URL(`/settings?integration=${platform}&connected=1`,request.url));
   response.cookies.set("createsoul_social_state","",{httpOnly:true,secure:process.env.NODE_ENV==="production",sameSite:"lax",maxAge:0,path:"/"});
