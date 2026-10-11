@@ -1,4 +1,7 @@
+"use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const plans = [
   {
@@ -62,6 +65,30 @@ const plans = [
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
+  const [busyPlan, setBusyPlan] = useState("");
+  const [checkoutMessage, setCheckoutMessage] = useState("");
+  async function choosePlan(planName: string, purchase: "creator" | "pro" | null) {
+    setCheckoutMessage("");
+    if (!purchase) { router.push("/login?next=/pricing"); return; }
+    setBusyPlan(planName);
+    try {
+      const response = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ purchase }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.status === 401) { router.push("/login?next=/pricing"); return; }
+      if (!response.ok) throw new Error(data.error || "Checkout is not available yet.");
+      if (typeof data.checkoutUrl !== "string" || !data.checkoutUrl) throw new Error("The payment provider did not return a checkout link.");
+      window.location.assign(data.checkoutUrl);
+    } catch (error) {
+      setCheckoutMessage(error instanceof Error ? error.message : "Could not start checkout.");
+    } finally {
+      setBusyPlan("");
+    }
+  }
   return (
     <main style={{ minHeight: "100vh", padding: "24px 20px 70px" }}>
       <nav style={{ maxWidth: 1180, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -104,12 +131,14 @@ export default function PricingPage() {
             <ul style={{ margin: "0 0 24px", paddingLeft: 20, lineHeight: 1.9 }}>
               {plan.features.map((feature) => <li key={feature}>{feature}</li>)}
             </ul>
-            <Link href="/login" className={index === 0 ? "cf-btn" : "cf-icon-btn"} style={{ display: "block", textAlign: "center", width: "100%", boxSizing: "border-box" }}>
-              {plan.cta}
-            </Link>
+            <button type="button" onClick={() => void choosePlan(plan.name, index === 1 ? "creator" : index === 2 ? "pro" : null)} disabled={busyPlan !== ""} className={index === 0 ? "cf-btn" : "cf-icon-btn"} style={{ display: "block", textAlign: "center", width: "100%", boxSizing: "border-box", cursor: busyPlan ? "wait" : "pointer", opacity: busyPlan && busyPlan !== plan.name ? 0.65 : 1 }}>
+              {busyPlan === plan.name ? "Connecting to checkout…" : plan.cta}
+            </button>
           </div>
         ))}
       </section>
+
+      {checkoutMessage && <div role="status" style={{ maxWidth: 820, margin: "18px auto 0", padding: 14, borderRadius: 12, border: "1px solid rgba(255,180,80,.35)", color: "inherit" }}>{checkoutMessage}</div>}
 
       <section style={{ maxWidth: 820, margin: "34px auto 0" }}>
         <div className="cf-card" style={{ padding: 24, lineHeight: 1.65 }}>
