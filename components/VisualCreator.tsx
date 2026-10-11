@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type VisualType = "thumbnail" | "banner" | "social" | "cover";
 const types: {id: VisualType; icon: string; label: string; ratio: string; hint: string}[] = [
@@ -25,8 +25,8 @@ export default function VisualCreator(){
   const [saving,setSaving]=useState(false);
   const [image,setImage]=useState<string|null>(null);
   const [message,setMessage]=useState("");
-  const [showMore,setShowMore]=useState(false);
-  const selected=types.find(x=>x.id===type)!;
+  const [showMore,setShowMore]=useState(false);\n  const [aiReady,setAiReady]=useState<boolean|null>(null);
+  useEffect(()=>{fetch("/api/system/status",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>setAiReady(Boolean(d?.ai?.image==="connected"))).catch(()=>setAiReady(false))},[]);\n  const selected=types.find(x=>x.id===type)!;
 
   function chooseQuick(item: typeof quickRequests[number]){
     setType(item.type);
@@ -63,7 +63,7 @@ export default function VisualCreator(){
   return <div className="cf-card cf-visual">
     <div className="cf-visual-head">
       <div><div className="cf-eyebrow">AI VISUAL STUDIO</div><h2>What do you want to create?</h2><p>Just tell CreateSoul AI your idea. You don't need to understand design settings.</p></div>
-      <span className="cf-live">● AI READY</span>
+      <span className="cf-live">{aiReady===null?"● Checking AI…":aiReady?"● AI READY":"● AI setup required"}</span>
     </div>
 
     <div className="cf-ai-request">
