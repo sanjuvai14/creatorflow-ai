@@ -46,9 +46,9 @@ jobs:
           permission = '<uses-permission android:name="android.permission.RECORD_AUDIO" />'
           if permission not in s:
               if marker in s:
-                  s = s.replace(marker, marker + "\\n    " + permission, 1)
+                  s = s.replace(marker, marker + "\n    " + permission, 1)
               else:
-                  s = s.replace("<application", permission + "\\n    <application", 1)
+                  s = s.replace("<application", permission + "\n    <application", 1)
               p.write_text(s)
           PY
 
@@ -100,7 +100,7 @@ jobs:
               }
           """, 1)
           pattern = r'(buildTypes\\s*\\{\\s*release\\s*\\{)'
-          s, count = re.subn(pattern, r'\\1\\n            signingConfig signingConfigs.release', s, count=1)
+          s, count = re.subn(pattern, r'\\1\n            signingConfig signingConfigs.release', s, count=1)
           if count != 1:
               raise SystemExit("Could not attach release signing config safely.")
           p.write_text(s)
