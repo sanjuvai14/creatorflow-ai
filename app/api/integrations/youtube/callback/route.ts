@@ -58,7 +58,7 @@ export async function GET(request: Request) {
   if (!channel?.id) return fail("youtube_channel_not_found");
 
   const supabase = createAdminClient();
-  const { data: existing } = await supabase.from("platform_connections").select("refresh_token_encrypted").eq("user_id", userId).eq("platform", "youtube").maybeSingle();
+  const { data: existing } = await supabase.from("platform_connections").select("refresh_token_encrypted").eq("user_id", userId).eq("platform", "youtube").eq("external_account_id", channel.id).maybeSingle();
   const { error } = await supabase.from("platform_connections").upsert({
     user_id: userId, platform: "youtube", status: "connected", external_account_id: channel.id,
     external_account_name: channel.snippet?.title || "YouTube channel",
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
     token_type: token.token_type || "Bearer",
     expires_at: token.expires_in ? new Date(Date.now() + token.expires_in * 1000).toISOString() : null,
     updated_at: new Date().toISOString(),
-  }, { onConflict: "user_id,platform" });
+  }, { onConflict: "user_id,platform,external_account_id" });
 
   if (error) return fail("connection_save_failed");
   const response = NextResponse.redirect(new URL("/settings?integration=youtube&connected=1", request.url));
