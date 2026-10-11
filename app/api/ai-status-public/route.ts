@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const DEFAULT_TEXT_MODEL = "gpt-5.6-luna";
+const DEFAULT_TEXT_MODEL = "gpt-5-mini";
 
 export async function GET() {
   const openai = Boolean(process.env.OPENAI_API_KEY);
