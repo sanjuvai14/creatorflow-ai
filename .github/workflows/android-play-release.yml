@@ -90,6 +90,12 @@ jobs:
           p.write_text(s)
           PY
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Build release AAB and APK
         working-directory: android
         run: ./gradlew bundleRelease assembleRelease --no-daemon
