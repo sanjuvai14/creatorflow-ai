@@ -131,7 +131,7 @@ export async function finishSocialOAuth(request: Request, platform: Platform) {
   if (!externalId) return fail("external_account_not_found");
 
   const admin = createAdminClient();
-  const {data: existing} = await admin.from("platform_connections").select("refresh_token_encrypted").eq("user_id",user.id).eq("platform",platform).maybeSingle();
+  const {data: existing} = await admin.from("platform_connections").select("refresh_token_encrypted").eq("user_id",user.id).eq("platform",platform).eq("external_account_id",String(externalId)).maybeSingle();
   const {error} = await admin.from("platform_connections").upsert({
     user_id:user.id, platform, status:"connected", external_account_id:String(externalId),
     external_account_name:data?.display_name || data?.name || `${platform} account`,
