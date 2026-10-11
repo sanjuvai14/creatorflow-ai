@@ -40,6 +40,22 @@ jobs:
       - name: Create Android project
         run: npx cap add android
 
+      - name: Enable Android microphone permission
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          s = p.read_text()
+          marker = '<uses-permission android:name="android.permission.INTERNET" />'
+          permission = '<uses-permission android:name="android.permission.RECORD_AUDIO" />'
+          if permission not in s:
+              if marker in s:
+                  s = s.replace(marker, marker + "\\n    " + permission, 1)
+              else:
+                  s = s.replace("<application", permission + "\\n    <application", 1)
+              p.write_text(s)
+          PY
+
       - name: Sync Capacitor
         run: npx cap sync android
 
