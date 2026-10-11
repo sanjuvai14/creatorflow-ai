@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const ALLOWED_PURCHASES = new Set(["starter", "creator", "pro", "credit"]);
+const ALLOWED_PURCHASES = new Set(["creator", "pro", "credit"]);
 
 const PRICE_ENV: Record<string, string> = {
-  starter: "PADDLE_STARTER_PRICE_ID",
   creator: "PADDLE_CREATOR_PRICE_ID",
   pro: "PADDLE_PRO_PRICE_ID",
   credit: "PADDLE_CREDIT_PRICE_ID",
