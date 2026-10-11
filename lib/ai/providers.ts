@@ -2,7 +2,7 @@ export type AIProviderName = "openai" | "gemini" | "anthropic" | "grok";
 
 // Safe defaults mirror .env.example. Explicit env values still override these defaults.
 const DEFAULT_MODELS: Record<AIProviderName, string> = {
-  openai: "gpt-5.6-luna",
+  openai: "gpt-5-mini",
   gemini: "",
   anthropic: "",
   grok: "",
