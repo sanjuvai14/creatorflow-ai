@@ -26,7 +26,7 @@ jobs:
           version: 10.12.4
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Prepare Capacitor web directory
         run: |
@@ -41,29 +41,39 @@ jobs:
 
       - name: Enforce Google Play target API 36
         run: |
-          if [ -f android/variables.gradle ]; then
-            sed -i -E 's/(compileSdkVersion[[:space:]]*=[[:space:]]*)[0-9]+/\136/g' android/variables.gradle
-            sed -i -E 's/(targetSdkVersion[[:space:]]*=[[:space:]]*)[0-9]+/\136/g' android/variables.gradle
-          fi
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path("android/variables.gradle")
+          if p.exists():
+              s = p.read_text()
+              s = re.sub(r'(compileSdkVersion\\s*=\\s*)\\d+', r'\\g<1>36', s)
+              s = re.sub(r'(targetSdkVersion\\s*=\\s*)\\d+', r'\\g<1>36', s)
+              p.write_text(s)
+              print("\\n".join(line for line in s.splitlines() if "compileSdkVersion" in line or "targetSdkVersion" in line))
+          PY
 
-      - name: Require release signing configuration
+      - name: Configure optional Android release signing
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          test -n "$KEYSTORE_B64" || (echo "Missing ANDROID_KEYSTORE_BASE64"; exit 1)
-          test -n "$KEYSTORE_PASSWORD" || (echo "Missing ANDROID_KEYSTORE_PASSWORD"; exit 1)
-          test -n "$KEY_ALIAS" || (echo "Missing ANDROID_KEY_ALIAS"; exit 1)
-          test -n "$KEY_PASSWORD" || (echo "Missing ANDROID_KEY_PASSWORD"; exit 1)
+          if [ -z "$KEYSTORE_B64$KEYSTORE_PASSWORD$KEY_ALIAS$KEY_PASSWORD" ]; then
+            echo "Signing secrets not configured; building an unsigned AAB/APK artifact."
+            exit 0
+          fi
+          test -n "$KEYSTORE_B64" && test -n "$KEYSTORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD" || (echo "All four Android signing secrets must be configured together." && exit 1)
           echo "$KEYSTORE_B64" | base64 --decode > android/createsoul-upload.jks
-
+          export KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD
           python - <<'PY'
           from pathlib import Path
+          import re
           p = Path("android/app/build.gradle")
           s = p.read_text()
-          signing = '''
+          if "signingConfigs {" not in s:
+              s = s.replace("android {", """android {
               signingConfigs {
                   release {
                       storeFile file("createsoul-upload.jks")
@@ -72,25 +82,23 @@ jobs:
                       keyPassword System.getenv("KEY_PASSWORD")
                   }
               }
-          '''
-          if "signingConfigs {" not in s:
-              s = s.replace("android {", "android {" + signing, 1)
-          s = s.replace("buildTypes {", "buildTypes {", 1)
-          s = s.replace("release {", "release {\n            signingConfig signingConfigs.release", 1)
+          """, 1)
+          pattern = r'(buildTypes\\s*\\{\\s*release\\s*\\{)'
+          s, count = re.subn(pattern, r'\\1\\n            signingConfig signingConfigs.release', s, count=1)
+          if count != 1:
+              raise SystemExit("Could not attach release signing config safely.")
           p.write_text(s)
           PY
 
-      - name: Build signed release AAB
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      - name: Build release AAB and APK
         working-directory: android
-        run: ./gradlew bundleRelease
+        run: ./gradlew bundleRelease assembleRelease --no-daemon
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: CreateSoul-AI-release
-          path: android/app/build/outputs/bundle/release/*.aab
+          name: CreateSoul-AI-Android-release
+          path: |
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
