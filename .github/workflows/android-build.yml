@@ -20,7 +20,7 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.4
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile --ignore-scripts
       - run: mkdir -p out && printf '<!doctype html><html><body></body></html>' > out/index.html
       - run: npx cap add android
       - name: Configure Android voice permissions
