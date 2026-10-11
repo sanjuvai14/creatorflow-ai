@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 type Item={id:string;title:string;type:string;content:string;created_at:string};
 export default function Saved(){
  const [items,setItems]=useState<Item[]>([]); const [q,setQ]=useState(""); const [loading,setLoading]=useState(true); const [error,setError]=useState(""); const [action,setAction]=useState(""); const router=useRouter();
- async function loadItems(){setLoading(true);setError("");try{const r=await fetch("/api/saved",{cache:"no-store"});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||(r.status===401?"Please sign in to view your saved content.":"Could not load saved content."));setItems(Array.isArray(data.items)?data.items:[])}catch(e){setError(e instanceof Error?e.message:"Could not load saved content.")}finally{setLoading(false)}}\n useEffect(()=>{void loadItems()},[]);
+ async function loadItems(){setLoading(true);setError("");try{const r=await fetch("/api/saved",{cache:"no-store"});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||(r.status===401?"Please sign in to view your saved content.":"Could not load saved content."));setItems(Array.isArray(data.items)?data.items:[])}catch(e){setError(e instanceof Error?e.message:"Could not load saved content.")}finally{setLoading(false)}}
+ useEffect(()=>{void loadItems()},[]);
  const filtered=useMemo(()=>items.filter(x=>(x.title+" "+x.type+" "+x.content).toLowerCase().includes(q.toLowerCase())),[items,q]);
  function flash(message:string){setAction(message);setTimeout(()=>setAction(""),1600)}
  async function copy(text:string){try{await navigator.clipboard?.writeText(text);flash("Copied ✓")}catch{flash("Copy failed")}}
