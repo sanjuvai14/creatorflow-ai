@@ -25,8 +25,10 @@ export default function VisualCreator(){
   const [saving,setSaving]=useState(false);
   const [image,setImage]=useState<string|null>(null);
   const [message,setMessage]=useState("");
-  const [showMore,setShowMore]=useState(false);\n  const [aiReady,setAiReady]=useState<boolean|null>(null);
-  useEffect(()=>{fetch("/api/system/status",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>setAiReady(Boolean(d?.ai?.image==="connected"))).catch(()=>setAiReady(false))},[]);\n  const selected=types.find(x=>x.id===type)!;
+  const [showMore,setShowMore]=useState(false);
+  const [aiReady,setAiReady]=useState<boolean|null>(null);
+  useEffect(()=>{fetch("/api/system/status",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(d=>setAiReady(Boolean(d?.ai?.image==="connected"))).catch(()=>setAiReady(false))},[]);
+  const selected=types.find(x=>x.id===type)!;
 
   function chooseQuick(item: typeof quickRequests[number]){
     setType(item.type);
