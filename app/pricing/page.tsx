@@ -8,7 +8,7 @@ const plans = [
     name: "Free",
     price: "$0",
     note: "Explore the core tools with no payment required.",
-    credits: "30 credits / month",
+    credits: "50 credits / month",
     features: [
       "Content ideas",
       "YouTube title, description & tags",
@@ -68,7 +68,7 @@ export default function PricingPage() {
   const router = useRouter();
   const [busyPlan, setBusyPlan] = useState("");
   const [checkoutMessage, setCheckoutMessage] = useState("");
-  async function choosePlan(planName: string, purchase: "creator" | "pro" | null) {
+  async function choosePlan(planName: string, purchase: "creator" | "pro" | "credit" | null) {
     setCheckoutMessage("");
     if (!purchase) { router.push("/login?next=/pricing"); return; }
     setBusyPlan(planName);
@@ -136,6 +136,19 @@ export default function PricingPage() {
             </button>
           </div>
         ))}
+      </section>
+
+      <section style={{ maxWidth: 1180, margin: "24px auto 0" }}>
+        <div className="cf-card cf-glow" style={{ padding: 24, display: "flex", flexWrap: "wrap", gap: 18, alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <div className="cf-eyebrow">ONE-TIME CREDIT PACK</div>
+            <h2 style={{ margin: "8px 0", fontSize: 24 }}>100 AI credits — $4.99</h2>
+            <p className="cf-muted" style={{ margin: 0, lineHeight: 1.6 }}>Pay once. Credits can be used for text generation or image creation. Text generation uses 1 credit; image generation uses 5 credits.</p>
+          </div>
+          <button type="button" onClick={() => void choosePlan("AI Credit Pack", "credit")} disabled={busyPlan !== ""} className="cf-icon-btn" style={{ minWidth: 190, padding: "12px 18px", cursor: busyPlan ? "wait" : "pointer" }}>
+            {busyPlan === "AI Credit Pack" ? "Connecting to checkout…" : "Buy 100 credits"}
+          </button>
+        </div>
       </section>
 
       {checkoutMessage && <div role="status" style={{ maxWidth: 820, margin: "18px auto 0", padding: 14, borderRadius: 12, border: "1px solid rgba(255,180,80,.35)", color: "inherit" }}>{checkoutMessage}</div>}
