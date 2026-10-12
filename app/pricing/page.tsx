@@ -24,7 +24,7 @@ const plans = [
   },
   {
     name: "Creator",
-    price: "$14.99",
+    price: "$9.99",
     note: "For creators publishing consistently every month.",
     credits: "300 credits / month",
     video: "Up to 20 × 30-sec, or 10 × 60-sec, or 6 × 90-sec videos / month",
@@ -44,7 +44,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$29.99",
+    price: "$19.99",
     note: "For serious creators, brands and frequent publishing.",
     credits: "750 credits / month",
     video: "Up to 50 × 30-sec, or 25 × 60-sec, or 16 × 90-sec videos / month",
