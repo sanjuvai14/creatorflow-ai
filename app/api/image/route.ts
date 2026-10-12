@@ -13,10 +13,10 @@ const MAX_TYPE_LENGTH = 100;
 const MAX_TEXT_LENGTH = 500;
 const ALLOWED_ASPECT_RATIOS = new Set(["1:1", "16:9", "4:5", "9:16"]);
 
-async function refundCredit(userId: string) {
+async function refundCredit(userId: string, amount = 5) {
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin.rpc("refund_credit", { p_user_id: userId });
+    const { data, error } = await admin.rpc("refund_credits", { p_user_id: userId, p_amount: amount });
     return { credits: error ? null : data, ok: !error };
   } catch {
     return { credits: null, ok: false };
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     }
 
     const admin = createAdminClient();
-    const { data: credits, error: creditError } = await admin.rpc("consume_credit", { p_user_id: user.id });
+    const { data: credits, error: creditError } = await admin.rpc("consume_credits", { p_user_id: user.id, p_amount: 5 });
     if (creditError) {
       const message = creditError.message?.toLowerCase() || "";
       if (message.includes("no credits")) return NextResponse.json({ error: "No credits left. Please upgrade or wait for your next credit reset." }, { status: 402 });
