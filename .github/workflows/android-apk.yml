@@ -69,7 +69,11 @@ jobs:
           marker = 'android:name="com.google.android.gms.ads.APPLICATION_ID"'
           meta = f'<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="{app_id}" />'
           if marker not in s:
-              s = s.replace("<application", "<application" + chr(10) + "        " + meta, 1)
+              app_start = s.find("<application")
+              tag_end = s.find(">", app_start)
+              if app_start < 0 or tag_end < 0:
+                  raise SystemExit("Android application tag not found")
+              s = s[:tag_end + 1] + chr(10) + "        " + meta + s[tag_end + 1:]
           p.write_text(s)
           print("Configured AdMob application ID: " + ("repository secret" if os.environ.get("ADMOB_APP_ID", "").strip() else "Google test ID"))
           PY
