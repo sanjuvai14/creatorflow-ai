@@ -58,16 +58,14 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import os, re
+          import os
           p = Path("android/app/src/main/AndroidManifest.xml")
           s = p.read_text()
           app_id = os.environ.get("ADMOB_APP_ID", "").strip() or "ca-app-pub-3940256099942544~3347511713"
           marker = 'android:name="com.google.android.gms.ads.APPLICATION_ID"'
           meta = f'<meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="{app_id}" />'
-          if marker in s:
-              s = re.sub(r'<meta-data[^>]*android:name="com\\.google\\.android\\.gms\\.ads\\.APPLICATION_ID"[^>]*/>', meta, s, count=1)
-          else:
-              s = s.replace("<application", "<application\\n        " + meta, 1)
+          if marker not in s:
+              s = s.replace("<application", "<application" + chr(10) + "        " + meta, 1)
           p.write_text(s)
           print("Configured AdMob application ID: " + ("repository secret" if os.environ.get("ADMOB_APP_ID", "").strip() else "Google test ID"))
           PY
