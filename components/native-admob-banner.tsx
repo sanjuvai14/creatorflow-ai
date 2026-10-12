@@ -41,6 +41,7 @@ export default function NativeAdMobBanner() {
         position: BannerAdPosition.BOTTOM_CENTER,
         margin: 0,
       });
+      document.body.classList.add("native-admob-banner-active");
     }
 
     void showFreeUserBanner().catch(() => {
@@ -49,6 +50,7 @@ export default function NativeAdMobBanner() {
 
     return () => {
       disposed = true;
+      document.body.classList.remove("native-admob-banner-active");
       void AdMob.hideBanner().catch(() => undefined);
     };
   }, []);

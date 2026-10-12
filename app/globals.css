@@ -82,3 +82,7 @@
   .cf-app-sidebar.mobile-open{display:flex!important;position:fixed!important;inset:0 auto 0 0!important;width:min(84vw,300px)!important;height:100dvh!important;z-index:91!important;overflow-y:auto!important;background:#101014!important;border-right:1px solid rgba(255,255,255,.12)!important;box-shadow:18px 0 60px rgba(0,0,0,.5)!important}
   .cf-sidebar-overlay{display:block;position:fixed;inset:0;z-index:90;border:0;background:rgba(0,0,0,.58);backdrop-filter:blur(2px);padding:0}
 }
+
+
+/* Keep scrollable app controls clear of the native AdMob banner. */
+body.native-admob-banner-active { padding-bottom: 64px !important; }
