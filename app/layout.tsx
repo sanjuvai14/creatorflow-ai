@@ -1,4 +1,5 @@
 import "./globals.css";
+import NativeAdMobBanner from "@/components/native-admob-banner";
 import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
@@ -18,5 +19,5 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="en"><body>{children}</body></html>;
+  return <html lang="en"><body>{children}<NativeAdMobBanner /></body></html>;
 }
