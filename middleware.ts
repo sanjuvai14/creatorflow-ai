@@ -47,19 +47,20 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const isPublicWebhook = pathname === "/api/billing/webhook";
   const isPublicAIStatus = pathname === "/api/ai-status" || pathname === "/api/ai-status-public";
-  const protectedPath = !isPublicWebhook && !isPublicAIStatus && (
+  const isPublicHealth = pathname === "/api/health" || pathname.startsWith("/api/health/");
+  const protectedPath = !isPublicWebhook && !isPublicAIStatus && !isPublicHealth && (
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/history") ||
     pathname.startsWith("/images") ||
     pathname.startsWith("/settings") ||
     pathname.startsWith("/platforms") ||
-    (pathname.startsWith("/api/") && pathname !== "/api/health")
+    (pathname.startsWith("/api/") && !isPublicHealth)
   );
 
   // These endpoints perform their own authorization/signature checks and must not
   // invoke Supabase auth middleware. Keeping them completely public also avoids
   // edge-runtime failures when auth configuration is unavailable.
-  if (isPublicWebhook || isPublicAIStatus || pathname === "/api/health") {
+  if (isPublicWebhook || isPublicAIStatus || isPublicHealth) {
     return applySecurityHeaders(NextResponse.next(), request);
   }
 
