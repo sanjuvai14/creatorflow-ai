@@ -41,7 +41,9 @@ function planForPrice(priceId: string | undefined) {
   const mappings: Array<[string | undefined, string]> = [
     [process.env.PADDLE_STARTER_PRICE_ID, "starter"],
     [process.env.PADDLE_CREATOR_PRICE_ID, "creator"],
+    [process.env.PADDLE_CREATOR_YEARLY_PRICE_ID, "creator"],
     [process.env.PADDLE_PRO_PRICE_ID, "pro"],
+    [process.env.PADDLE_PRO_YEARLY_PRICE_ID, "pro"],
   ];
   return mappings.find(([configuredId]) => configuredId && configuredId === priceId)?.[1] || null;
 }
@@ -197,9 +199,14 @@ export async function POST(request: Request) {
       if (!userId) return NextResponse.json({ error: "Transaction is not linked to a CreateSoul user." }, { status: 422 });
 
       const priceId = getPriceId(data);
-      const plan = planForPrice(priceId);
+      const customPlan = typeof data.custom_data?.plan === "string" && ["starter", "creator", "pro"].includes(data.custom_data.plan)
+        ? data.custom_data.plan
+        : null;
+      const plan = planForPrice(priceId) || customPlan;
       const creditMap = parseJsonMap("PADDLE_CREDIT_PRICE_MAP_JSON");
-      const creditsForPrice = creditMap[priceId || ""] || 0;
+      const mappedCredits = creditMap[priceId || ""] || 0;
+      const configuredCreditAmount = parseAmount(process.env.PADDLE_CREDIT_AMOUNT ?? "100") ?? 100;
+      const creditsForPrice = mappedCredits || (priceId && priceId === process.env.PADDLE_CREDIT_PRICE_ID ? configuredCreditAmount : 0);
       const isPaid = eventType === "transaction.paid" || eventType === "transaction.completed";
       const status = typeof data.status === "string"
         ? data.status
