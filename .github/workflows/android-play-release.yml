@@ -85,8 +85,8 @@ jobs:
           p = Path("android/variables.gradle")
           if p.exists():
               s = p.read_text()
-              s = re.sub(r'(compileSdkVersion\\s*=\\s*)\\d+', r'\\g<1>36', s)
-              s = re.sub(r'(targetSdkVersion\\s*=\\s*)\\d+', r'\\g<1>36', s)
+              s = re.sub(r'(compileSdkVersion\s*=\s*)\d+', r'\g<1>36', s)
+              s = re.sub(r'(targetSdkVersion\s*=\s*)\d+', r'\g<1>36', s)
               p.write_text(s)
               print("\\n".join(line for line in s.splitlines() if "compileSdkVersion" in line or "targetSdkVersion" in line))
           PY
@@ -121,8 +121,8 @@ jobs:
                   }
               }
           """, 1)
-          pattern = r'(buildTypes\\s*\\{\\s*release\\s*\\{)'
-          s, count = re.subn(pattern, r'\\1\n            signingConfig signingConfigs.release', s, count=1)
+          pattern = r'(buildTypes\s*\{\s*release\s*\{)'
+          s, count = re.subn(pattern, r'\1\n            signingConfig signingConfigs.release', s, count=1)
           if count != 1:
               raise SystemExit("Could not attach release signing config safely.")
           p.write_text(s)
