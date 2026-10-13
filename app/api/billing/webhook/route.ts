@@ -227,7 +227,9 @@ export async function POST(request: Request) {
         p_product_type: plan ? "subscription" : "credit_purchase",
         p_plan: plan,
         p_credits: creditsForPrice,
-        p_credit_delta: isPaid ? creditsForPrice : 0,
+        // Paddle can emit both transaction.paid and transaction.completed for one purchase.
+        // Grant purchased credits only once at payment capture; completion events must not grant them again.
+        p_credit_delta: eventType === "transaction.paid" ? creditsForPrice : 0,
         p_amount_minor: parseAmount(data.details?.totals?.grand_total),
         p_currency: typeof data.currency_code === "string" ? data.currency_code : null,
         p_transaction_status: status,
