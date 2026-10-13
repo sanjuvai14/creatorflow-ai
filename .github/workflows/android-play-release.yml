@@ -91,7 +91,8 @@ jobs:
               print("\\n".join(line for line in s.splitlines() if "compileSdkVersion" in line or "targetSdkVersion" in line))
           PY
 
-      - name: Configure optional Android release signing
+      - name: Configure Android release signing
+        id: signing
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -99,12 +100,14 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ -z "$KEYSTORE_B64$KEYSTORE_PASSWORD$KEY_ALIAS$KEY_PASSWORD" ]; then
-            echo "Signing secrets not configured; building an unsigned AAB/APK artifact."
+            echo "Signing secrets not configured; this artifact is for preview/sideload testing only, not Google Play upload."
+            echo "artifact_name=CreateSoul-AI-Android-unsigned-preview" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           test -n "$KEYSTORE_B64" && test -n "$KEYSTORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD" || (echo "All four Android signing secrets must be configured together." && exit 1)
           echo "$KEYSTORE_B64" | base64 --decode > android/createsoul-upload.jks
           export KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD
+          echo "artifact_name=CreateSoul-AI-Android-release" >> "$GITHUB_OUTPUT"
           python - <<'PY'
           from pathlib import Path
           import re
@@ -141,7 +144,7 @@ jobs:
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: CreateSoul-AI-Android-release
+          name: ${{ steps.signing.outputs.artifact_name }}
           path: |
             android/app/build/outputs/bundle/release/*.aab
             android/app/build/outputs/apk/release/*.apk
