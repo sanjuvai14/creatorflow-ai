@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const ALLOWED_PURCHASES = new Set(["creator", "pro", "credit"]);
+const ALLOWED_PURCHASES = new Set(["creator", "pro", "creator_yearly", "pro_yearly", "credit"]);
 
 const PRICE_ENV: Record<string, string> = {
   creator: "PADDLE_CREATOR_PRICE_ID",
   pro: "PADDLE_PRO_PRICE_ID",
+  creator_yearly: "PADDLE_CREATOR_YEARLY_PRICE_ID",
+  pro_yearly: "PADDLE_PRO_YEARLY_PRICE_ID",
   credit: "PADDLE_CREDIT_PRICE_ID",
 };
 
@@ -29,6 +31,7 @@ export async function POST(req: Request) {
     const apiKey = process.env.PADDLE_API_KEY;
     const priceId = process.env[PRICE_ENV[purchase]];
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const basePlan = purchase.endsWith("_yearly") ? purchase.slice(0, -"_yearly".length) : purchase;
 
     // Safe-by-default: this route cannot collect real money until the owner
     // explicitly enables Paddle and supplies the server-side credentials.
@@ -57,7 +60,8 @@ export async function POST(req: Request) {
         checkout: { url: appUrl },
         custom_data: {
           user_id: user.id,
-          plan: purchase === "credit" ? null : purchase,
+          plan: purchase === "credit" ? null : basePlan,
+          billing_cycle: purchase.endsWith("_yearly") ? "yearly" : purchase === "credit" ? null : "monthly",
           purchase_type: purchase === "credit" ? "credit_purchase" : "subscription",
         },
       }),
