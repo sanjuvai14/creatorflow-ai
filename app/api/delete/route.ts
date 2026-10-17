@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const runtime = "edge";
 const allowedTables = new Set(["saved_content", "generations", "saved_images"]);
 const MAX_BODY_BYTES = 2_000;
 const MAX_ID_LENGTH = 100;
