@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { runAgentForUser } from "@/lib/agents/creator-agent";
 
+export const runtime = "edge";
 // Keep a generous UTF-8 byte guard while allowing long Bangla/Unicode messages.
 const MAX_INPUT_BYTES = 64 * 1024;
 const MAX_MESSAGE_CHARS = 24000;

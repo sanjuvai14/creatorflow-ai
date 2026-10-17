@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const runtime = "edge";
 const allowed = new Set(["login", "generation", "credits", "image", "platform", "billing", "other"]);
 const MAX_BODY_BYTES = 12 * 1024;
 

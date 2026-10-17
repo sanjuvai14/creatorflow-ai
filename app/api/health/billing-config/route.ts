@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function GET() {
   const creatorPriceConfigured = Boolean(process.env.PADDLE_CREATOR_PRICE_ID);

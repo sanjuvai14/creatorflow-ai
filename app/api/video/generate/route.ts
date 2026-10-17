@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const runtime = "edge";
 const COSTS: Record<string, number> = { "30": 30, "60": 60, "90": 90 };
 
 export async function POST(request: Request) {

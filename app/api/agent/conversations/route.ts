@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+export const runtime = "edge";
 const MAX_BODY_BYTES = 24 * 1024;
 const MAX_TITLE = 120;
 const MAX_CONTENT = 20000;

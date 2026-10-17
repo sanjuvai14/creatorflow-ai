@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { writeAuditEvent } from "@/lib/audit";
 
+export const runtime = "edge";
 const MAX_PAYLOAD_BYTES = 32_000;
 
 export async function GET() {
