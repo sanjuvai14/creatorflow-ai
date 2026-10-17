@@ -7,6 +7,7 @@ const plans = [
   {
     name: "Free",
     price: "$0",
+    yearlyPrice: "$0",
     note: "Explore the core tools with no payment required.",
     credits: "50 credits / month",
     features: [
