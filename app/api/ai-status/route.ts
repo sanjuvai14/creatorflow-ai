@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
 const DEFAULT_TEXT_MODEL = "gpt-5-mini";
 
 export async function GET() {
