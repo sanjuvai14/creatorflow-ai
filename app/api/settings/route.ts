@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const runtime = "edge";
 const MAX_BODY_BYTES = 8 * 1024;
 
 export async function POST(request: Request) {
