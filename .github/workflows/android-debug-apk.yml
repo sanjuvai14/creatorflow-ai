@@ -6,14 +6,12 @@ on:
     paths:
       - "capacitor.config.ts"
       - "package.json"
-      - "pnpm-lock.yaml"
       - ".github/workflows/android-debug-apk.yml"
   push:
     branches: [main]
     paths:
       - "capacitor.config.ts"
       - "package.json"
-      - "pnpm-lock.yaml"
       - ".github/workflows/android-debug-apk.yml"
   workflow_dispatch:
 
@@ -49,8 +47,9 @@ jobs:
           corepack enable
           corepack prepare pnpm@10.12.4 --activate
 
+      # The repository currently has no committed package-manager lockfile.
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       # The Capacitor config points to the hosted CreateSoul web app. A minimal
       # local entry file is still required by Capacitor when generating/syncing
