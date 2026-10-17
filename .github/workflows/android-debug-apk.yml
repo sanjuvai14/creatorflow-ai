@@ -1,0 +1,93 @@
+name: Android Debug APK
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "capacitor.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/android-debug-apk.yml"
+  push:
+    branches: [main]
+    paths:
+      - "capacitor.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/android-debug-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-debug-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-debug-apk:
+    name: Build Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.12.4 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The Capacitor config points to the hosted CreateSoul web app. A minimal
+      # local entry file is still required by Capacitor when generating/syncing
+      # the native Android wrapper.
+      - name: Prepare Capacitor web directory
+        run: |
+          mkdir -p out
+          cat > out/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>CreateSoul AI</title>
+            </head>
+            <body>
+              <p>Loading CreateSoul AI…</p>
+            </body>
+          </html>
+          HTML
+
+      - name: Generate Android platform
+        run: pnpm exec cap add android
+
+      - name: Sync Capacitor
+        run: pnpm exec cap sync android
+
+      - name: Build debug APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: createsoul-android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
