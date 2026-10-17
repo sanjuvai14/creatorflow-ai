@@ -25,6 +25,7 @@ const plans = [
   {
     name: "Creator",
     price: "$9.99",
+    yearlyPrice: "$99.99",
     note: "For creators publishing consistently every month.",
     credits: "300 credits / month",
     video: "Up to 20 × 30-sec, or 10 × 60-sec, or 6 × 90-sec videos / month",
@@ -45,6 +46,7 @@ const plans = [
   {
     name: "Pro",
     price: "$19.99",
+    yearlyPrice: "$199.99",
     note: "For serious creators, brands and frequent publishing.",
     credits: "750 credits / month",
     video: "Up to 50 × 30-sec, or 25 × 60-sec, or 16 × 90-sec videos / month",
@@ -67,8 +69,9 @@ const plans = [
 export default function PricingPage() {
   const router = useRouter();
   const [busyPlan, setBusyPlan] = useState("");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [checkoutMessage, setCheckoutMessage] = useState("");
-  async function choosePlan(planName: string, purchase: "creator" | "pro" | "credit" | null) {
+  async function choosePlan(planName: string, purchase: "creator" | "pro" | "creator_yearly" | "pro_yearly" | "credit" | null) {
     setCheckoutMessage("");
     if (!purchase) { router.push("/login?next=/pricing"); return; }
     setBusyPlan(planName);
@@ -113,13 +116,18 @@ export default function PricingPage() {
         </p>
       </section>
 
-      <section style={{ maxWidth: 1180, margin: "46px auto 0", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(245px,1fr))", gap: 18 }}>
+      <section style={{ maxWidth: 1180, margin: "34px auto 0", display: "flex", justifyContent: "center", gap: 8 }} aria-label="Billing cycle">
+        <button type="button" onClick={() => setBillingCycle("monthly")} aria-pressed={billingCycle === "monthly"} className="cf-icon-btn" style={{ border: billingCycle === "monthly" ? "1px solid #9b87ff" : undefined }}>Monthly</button>
+        <button type="button" onClick={() => setBillingCycle("yearly")} aria-pressed={billingCycle === "yearly"} className="cf-icon-btn" style={{ border: billingCycle === "yearly" ? "1px solid #9b87ff" : undefined }}>Yearly · Save 2 months</button>
+      </section>
+
+      <section style={{ maxWidth: 1180, margin: "18px auto 0", display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(245px,1fr))", gap: 18 }}>
         {plans.map((plan, index) => (
           <div className="cf-card cf-glow" key={plan.name} style={{ padding: 26, position: "relative", border: index === 1 ? "1px solid rgba(139,124,255,.55)" : undefined }}>
             {index === 1 && <div className="cf-eyebrow" style={{ position: "absolute", top: 18, right: 18 }}>MOST POPULAR</div>}
             <h2 style={{ margin: 0, fontSize: 24 }}>{plan.name}</h2>
             <div style={{ marginTop: 18, fontSize: 42, fontWeight: 900 }}>
-              {plan.price}<span style={{ fontSize: 14, opacity: 0.6 }}>{plan.price !== "$0" ? "/month" : "/forever"}</span>
+              {billingCycle === "yearly" && index > 0 ? plan.yearlyPrice : plan.price}<span style={{ fontSize: 14, opacity: 0.6 }}>{plan.price !== "$0" ? (billingCycle === "yearly" ? "/year" : "/month") : "/forever"}</span>
             </div>
             <p className="cf-muted" style={{ minHeight: 42, lineHeight: 1.5 }}>{plan.note}</p>
             <div style={{ fontWeight: 800, margin: "20px 0 8px" }}>{plan.credits}</div>
@@ -131,7 +139,7 @@ export default function PricingPage() {
             <ul style={{ margin: "0 0 24px", paddingLeft: 20, lineHeight: 1.9 }}>
               {plan.features.map((feature) => <li key={feature}>{feature}</li>)}
             </ul>
-            <button type="button" onClick={() => void choosePlan(plan.name, index === 1 ? "creator" : index === 2 ? "pro" : null)} disabled={busyPlan !== ""} className={index === 0 ? "cf-btn" : "cf-icon-btn"} style={{ display: "block", textAlign: "center", width: "100%", boxSizing: "border-box", cursor: busyPlan ? "wait" : "pointer", opacity: busyPlan && busyPlan !== plan.name ? 0.65 : 1 }}>
+            <button type="button" onClick={() => void choosePlan(plan.name, index === 1 ? (billingCycle === "yearly" ? "creator_yearly" : "creator") : index === 2 ? (billingCycle === "yearly" ? "pro_yearly" : "pro") : null)} disabled={busyPlan !== ""} className={index === 0 ? "cf-btn" : "cf-icon-btn"} style={{ display: "block", textAlign: "center", width: "100%", boxSizing: "border-box", cursor: busyPlan ? "wait" : "pointer", opacity: busyPlan && busyPlan !== plan.name ? 0.65 : 1 }}>
               {busyPlan === plan.name ? "Connecting to checkout…" : plan.cta}
             </button>
           </div>
@@ -159,8 +167,7 @@ export default function PricingPage() {
           Video allowances shown above are monthly planning caps for standard CreateSoul video generation and use the same monthly video allowance rather than stacking together.
           Unused monthly plan credits do not automatically become extra video allowance.
           <br /><br />
-          <strong>Billing:</strong> international card/payment options and Bangladesh-compatible merchant payment rails are being prepared.
-          Real-money billing will only be enabled after server-side payment verification, signed webhooks, idempotency and plan/credit activation are implemented and tested.
+          <strong>Billing:</strong> Paddle Sandbox checkout is configured for Preview deployments only. Production payments remain disabled until live merchant credentials, live price IDs, webhook configuration and end-to-end payment-to-credit/subscription tests are completed. Bangladesh-local payment rails are not enabled.
         </div>
       </section>
     </main>
