@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getProviderConfigs, resolveProvider, providerIsConfigured, type AIProviderId } from "@/lib/ai/providers";
 
+export const runtime = "edge";
 const MAX_TOPIC_LENGTH = 5000;
 const MAX_PAYLOAD_BYTES = 64 * 1024;
 const RATE_LIMIT = 10;
