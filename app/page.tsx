@@ -1,6 +1,7 @@
 import "./landing.css";
 import Link from "next/link";
 import type { Route } from "next";
+import HomeComposer from "@/components/HomeComposer";
 
 const tools: Array<{ icon: string; title: string; description: string; href: Route }> = [
   { icon: "✦", title: "Chat with AI", description: "Ask questions, draft content and explore ideas.", href: "/login" },
@@ -33,6 +34,8 @@ export default function Home() {
         </div>
         <p className="cs-home-v2-note">Sign in to access your personal workspace and saved projects.</p>
       </section>
+
+      <HomeComposer />
 
       <section className="cs-home-v2-tools" aria-labelledby="cs-home-v2-tools-title">
         <div className="cs-home-v2-section-heading">
