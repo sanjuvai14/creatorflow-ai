@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Route } from "next";
 
 export default function HomeComposer() {
   const [message, setMessage] = useState("");
@@ -9,7 +10,7 @@ export default function HomeComposer() {
   function send() {
     const prompt = message.trim();
     if (!prompt) return;
-    router.push("/dashboard?prompt=" + encodeURIComponent(prompt));
+    router.push(("/dashboard?prompt=" + encodeURIComponent(prompt)) as Route);
   }
   return (
     <div className="cs-home-v2-composer-dock">
