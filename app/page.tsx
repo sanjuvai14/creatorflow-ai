@@ -1,40 +1,55 @@
 import Link from "next/link";
-import type { Route } from "next";
 
-const quickActions: Array<[string,string,string,Route]> = [
-  ["✦","Ask anything","Chat with CreateSoul AI","/login"],
-  ["▧","Create an image","Generate visuals and thumbnails","/images"],
-  ["⌕","Research & write","Turn ideas into ready-to-use content","/login"],
-  ["◷","Plan content","Schedule and organize your workflow","/login"],
+const tools = [
+  { icon: "✦", title: "Chat with AI", description: "Ask questions, draft content and explore ideas.", href: "/login" },
+  { icon: "▧", title: "Create images", description: "Make visuals and thumbnails for your projects.", href: "/images" },
+  { icon: "⌕", title: "Research & write", description: "Turn a rough idea into a clear first draft.", href: "/login" },
+  { icon: "◷", title: "Plan content", description: "Organize your next creator project.", href: "/growth" },
 ];
 
 export default function Home() {
   return (
-    <main className="cf-app-shell cs-landing-shell">
-      <aside className="cf-app-sidebar cs-landing-sidebar">
-        <Link href="/" className="cf-side-brand" aria-label="CreateSoul AI home"><span>Create</span><strong>Soul</strong><em>AI</em></Link>
-        <div className="cf-side-nav">
-          <Link href="/login" className="primary-side"><span>＋</span>New chat</Link>
-          <Link href="/login"><span>⌕</span>Search</Link>
-          <Link href="/images"><span>▧</span>Images</Link>
-          <Link href="/saved"><span>▤</span>Library</Link>
-          <Link href="/pricing"><span>◇</span>Plans</Link>
-          <Link href="/platforms"><span>⊞</span>Apps</Link>
+    <main className="cs-home-v2">
+      <header className="cs-home-v2-header">
+        <Link href="/" className="cs-home-v2-brand" aria-label="CreateSoul AI home">
+          <span className="cs-home-v2-mark">✦</span>
+          <span>CreateSoul <em>AI</em></span>
+        </Link>
+        <nav className="cs-home-v2-nav" aria-label="Main navigation">
+          <Link href="/pricing">Pricing</Link>
+          <Link href="/login" className="cs-home-v2-signin">Sign in</Link>
+        </nav>
+      </header>
+
+      <section className="cs-home-v2-hero">
+        <div className="cs-home-v2-eyebrow"><span /> YOUR AI CREATIVE WORKSPACE</div>
+        <h1>Bring your ideas<br /><span>to life with AI.</span></h1>
+        <p className="cs-home-v2-intro">Chat, create images, research and plan your next project — all in one place.</p>
+        <div className="cs-home-v2-actions">
+          <Link href="/login" className="cs-home-v2-primary">Start chatting <span aria-hidden="true">↗</span></Link>
+          <Link href="/images" className="cs-home-v2-secondary">Explore image tools</Link>
         </div>
-        <div className="cf-side-section"><div className="cf-side-label">CREATESOUL AI</div><div className="cf-empty-chats">Your private AI workspace for chat, creation, research and creator tools.</div></div>
-        <div className="cf-side-bottom"><Link href="/support">◌ Support Center</Link><Link href="/settings">⚙ Settings</Link></div>
-      </aside>
-      <section className="cf-app-main cs-landing-main">
-        <header className="cf-app-top cs-landing-top"><div className="cf-mobile-title">CreateSoul AI</div><div className="cs-landing-actions"><Link href="/pricing" className="cf-icon-btn">Pricing</Link><Link href="/login" className="cf-btn">Sign in</Link></div></header>
-        <div className="cs-landing-content">
-          <div className="cs-landing-badge">✦ CREATE · RESEARCH · GROW</div>
-          <h1>What can I help you with?</h1>
-          <p>Ask CreateSoul AI anything, create visuals, research ideas and turn your prompts into useful creator work.</p>
-          <div className="cs-quick-grid">{quickActions.map(([icon,title,desc,href]) => <Link href={href} className="cf-card cs-quick-card" key={title}><span className="cs-quick-icon">{icon}</span><span><strong>{title}</strong><small>{desc}</small></span><b>↗</b></Link>)}</div>
-          <div className="cs-landing-composer"><div className="cs-composer-top">Ask CreateSoul AI</div><Link href="/login" className="cs-composer-input"><span>Just ask CreateSoul anything…</span><b>↗</b></Link><div className="cs-composer-tools"><span>✦ AI workspace</span><span>▧ Images</span><span>⌕ Research</span><span>◷ Planning</span></div></div>
-          <div className="cs-landing-note">CreateSoul AI · Your ideas, amplified by AI</div>
+        <p className="cs-home-v2-note">Sign in to access your personal workspace and saved projects.</p>
+      </section>
+
+      <section className="cs-home-v2-tools" aria-labelledby="cs-home-v2-tools-title">
+        <div className="cs-home-v2-section-heading">
+          <div><span>ONE WORKSPACE</span><h2 id="cs-home-v2-tools-title">What would you like to do?</h2></div>
+          <p>Choose a tool to get started.</p>
+        </div>
+        <div className="cs-home-v2-grid">
+          {tools.map((tool) => (
+            <Link href={tool.href} className="cs-home-v2-card" key={tool.title}>
+              <span className="cs-home-v2-tool-icon" aria-hidden="true">{tool.icon}</span>
+              <span className="cs-home-v2-card-copy"><strong>{tool.title}</strong><small>{tool.description}</small></span>
+              <span className="cs-home-v2-arrow" aria-hidden="true">↗</span>
+            </Link>
+          ))}
         </div>
       </section>
+      <footer className="cs-home-v2-footer">
+        <span>CreateSoul AI</span><span>Your ideas, amplified.</span>
+      </footer>
     </main>
   );
 }
