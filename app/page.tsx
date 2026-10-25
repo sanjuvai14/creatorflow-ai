@@ -1,7 +1,8 @@
 import "./landing.css";
 import Link from "next/link";
+import type { Route } from "next";
 
-const tools = [
+const tools: Array<{ icon: string; title: string; description: string; href: Route }> = [
   { icon: "✦", title: "Chat with AI", description: "Ask questions, draft content and explore ideas.", href: "/login" },
   { icon: "▧", title: "Create images", description: "Make visuals and thumbnails for your projects.", href: "/images" },
   { icon: "⌕", title: "Research & write", description: "Turn a rough idea into a clear first draft.", href: "/login" },
