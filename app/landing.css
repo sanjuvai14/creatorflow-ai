@@ -1,0 +1,41 @@
+/* Scoped responsive landing page. Kept separate so the existing workspace styles are untouched. */
+.cs-home-v2{min-height:100dvh;width:100%;overflow-x:clip;color:#f8f7ff;background:radial-gradient(ellipse at 12% 0%,rgba(124,58,237,.22),transparent 38rem),radial-gradient(ellipse at 92% 15%,rgba(34,211,238,.11),transparent 32rem),#080810;padding:0 max(18px,calc((100vw - 1120px)/2));display:flex;flex-direction:column}
+.cs-home-v2 *{box-sizing:border-box}
+.cs-home-v2-header{width:100%;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.cs-home-v2-brand{display:inline-flex;align-items:center;gap:10px;color:#fff;font-weight:850;font-size:19px;letter-spacing:-.6px;white-space:nowrap}
+.cs-home-v2-brand em{font-style:normal;font-size:10px;letter-spacing:1px;color:#c4b5fd;border:1px solid rgba(167,139,250,.35);border-radius:6px;padding:4px 6px;margin-left:3px}
+.cs-home-v2-mark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(140deg,#a78bfa,#7c3aed 55%,#22d3ee);box-shadow:inset 0 1px 3px #ffffff66,0 8px 25px #7c3aed44}
+.cs-home-v2-nav{display:flex;align-items:center;gap:12px}
+.cs-home-v2-nav a{font-size:13px;font-weight:650;color:#c6c4d6;padding:10px 12px;border-radius:11px}
+.cs-home-v2-nav a:hover{color:#fff;background:#ffffff0d}
+.cs-home-v2-nav .cs-home-v2-signin{color:#fff;background:linear-gradient(120deg,#7c3aed,#4775e8);padding:11px 17px}
+.cs-home-v2-hero{width:100%;text-align:center;padding:clamp(58px,9vw,108px) 0 62px;display:flex;align-items:center;flex-direction:column}
+.cs-home-v2-eyebrow{display:inline-flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid rgba(167,139,250,.2);border-radius:999px;background:#8b5cf60f;color:#c9c0ed;font-size:10px;font-weight:800;letter-spacing:1.5px}
+.cs-home-v2-eyebrow>span{width:7px;height:7px;border-radius:50%;background:#22d3ee;box-shadow:0 0 12px #22d3ee}
+.cs-home-v2-hero h1{font-size:clamp(42px,7.5vw,76px);line-height:1.04;letter-spacing:clamp(-4px,-.5vw,-1.5px);font-weight:850;margin:25px 0 18px;max-width:900px}
+.cs-home-v2-hero h1 span{background:linear-gradient(100deg,#c4b5fd 8%,#8b5cf6 50%,#22d3ee 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cs-home-v2-intro{max-width:570px;margin:0;color:#a5a3b8;font-size:clamp(14px,2vw,17px);line-height:1.75}
+.cs-home-v2-actions{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:28px}
+.cs-home-v2-actions a{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;padding:0 19px;border-radius:13px;font-size:13px;font-weight:800;transition:transform .15s ease,border-color .15s ease}
+.cs-home-v2-actions a:hover{transform:translateY(-2px)}
+.cs-home-v2-primary{background:linear-gradient(120deg,#8b5cf6,#5479f3 65%,#22b8d4);color:#fff;box-shadow:0 12px 30px #6545d933}
+.cs-home-v2-primary span{font-size:17px}
+.cs-home-v2-secondary{border:1px solid rgba(255,255,255,.12);background:#ffffff08;color:#e4e2ef}
+.cs-home-v2-note{font-size:11px;line-height:1.5;color:#77768c;margin:15px 0 0}
+.cs-home-v2-tools{width:100%;padding:15px 0 56px}
+.cs-home-v2-section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:19px}
+.cs-home-v2-section-heading>div>span{font-size:9px;font-weight:850;letter-spacing:1.6px;color:#a99be0}
+.cs-home-v2-section-heading h2{font-size:clamp(22px,3vw,30px);letter-spacing:-1px;line-height:1.2;margin:8px 0 0}
+.cs-home-v2-section-heading>p{margin:0 0 3px;color:#8e8ca2;font-size:12px}
+.cs-home-v2-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.cs-home-v2-card{position:relative;display:flex;align-items:flex-start;gap:14px;min-width:0;min-height:128px;padding:20px;border-radius:18px;border:1px solid rgba(255,255,255,.095);background:linear-gradient(145deg,rgba(25,25,48,.9),rgba(14,14,27,.92));transition:transform .16s ease,border-color .16s ease,background .16s ease}
+.cs-home-v2-card:hover{transform:translateY(-2px);border-color:#8b5cf65c;background:linear-gradient(145deg,#201b3a,#11111f)}
+.cs-home-v2-tool-icon{width:42px;height:42px;flex:0 0 42px;border-radius:13px;display:grid;place-items:center;font-size:19px;color:#d8ceff;background:linear-gradient(145deg,#8b5cf62c,#22d3ee14);border:1px solid #ffffff12}
+.cs-home-v2-card-copy{display:flex;flex-direction:column;gap:7px;min-width:0;padding:2px 14px 0 0}
+.cs-home-v2-card-copy strong{font-size:14px;line-height:1.35;color:#f7f5ff}
+.cs-home-v2-card-copy small{font-size:12px;line-height:1.55;color:#9694aa}
+.cs-home-v2-arrow{position:absolute;right:17px;top:18px;color:#85819f;font-size:14px}
+.cs-home-v2-footer{margin-top:auto;min-height:62px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid rgba(255,255,255,.07);font-size:10px;color:#77758b}
+.cs-home-v2-footer span:first-child{font-weight:800;color:#aaa6c4}
+@media(max-width:600px){.cs-home-v2{padding:0 16px}.cs-home-v2-header{min-height:64px}.cs-home-v2-brand{font-size:16px;gap:8px}.cs-home-v2-mark{width:30px;height:30px;border-radius:10px}.cs-home-v2-nav{gap:4px}.cs-home-v2-nav a{font-size:12px;padding:9px 10px}.cs-home-v2-nav .cs-home-v2-signin{padding:10px 12px}.cs-home-v2-hero{padding:62px 0 45px}.cs-home-v2-hero h1{font-size:clamp(39px,10.2vw,53px);letter-spacing:-2px;margin:22px 0 14px}.cs-home-v2-intro{font-size:14px;line-height:1.65;max-width:360px}.cs-home-v2-actions{width:100%;gap:9px;margin-top:23px}.cs-home-v2-actions a{min-height:46px;padding:0 13px;font-size:12px}.cs-home-v2-note{max-width:300px}.cs-home-v2-tools{padding:8px 0 38px}.cs-home-v2-section-heading{display:block}.cs-home-v2-section-heading h2{font-size:23px}.cs-home-v2-section-heading>p{margin-top:8px}.cs-home-v2-grid{grid-template-columns:minmax(0,1fr);gap:10px}.cs-home-v2-card{min-height:104px;padding:16px;border-radius:15px;gap:12px}.cs-home-v2-tool-icon{width:39px;height:39px;flex-basis:39px}.cs-home-v2-card-copy strong{font-size:13px}.cs-home-v2-card-copy small{font-size:11px;max-width:245px}.cs-home-v2-footer{min-height:54px}}
+@media(prefers-reduced-motion:reduce){.cs-home-v2-card,.cs-home-v2-actions a{transition:none}}
